@@ -1,0 +1,6 @@
+{
+  "name": "XLMX",
+  "description": "Centro Especializado en Optimización y Cuidado de tu Imagen. Mas que una barbería: tu comunidad exclusiva para una experiencia premium.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
