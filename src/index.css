@@ -91,3 +91,24 @@ body {
 .theme-bronce .text-premium {
   color: #ea580c !important;
 }
+/* ==========================================================================
+   TEMA INTERACTIVO: EXCLUSIVIDAD GOLD FLÚOR
+   ========================================================================== */
+
+/* Cuando el contenedor principal tiene la clase theme-gold */
+.theme-gold {
+  /* 1. Iluminación neón/flúor dorada para todos los títulos principales y secundarios */
+  h1, h2, h3, .text-premium-gold {
+    color: #fff4b8 !important;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 200, 0, 0.5) !important;
+    transition: all 0.5s ease;
+  }
+
+  /* 2. Bordes dorados flúor con iluminación exterior para todas las imágenes del sitio */
+  img {
+    border: 2px solid #ffd700 !important;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6), inset 0 0 10px rgba(255, 215, 0, 0.2) !important;
+    border-radius: 12px !important; /* Esquinas redondeadas y pulidas */
+    transition: all 0.5s ease;
+  }
+}
