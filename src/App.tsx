@@ -84,7 +84,10 @@ const handleLogoutClient = () => {
     rawMembership.includes('plata') ? 'theme-plata' :
     rawMembership.includes('bronce') ? 'theme-bronce' : '';
   return (
-    <div className={`min-h-screen bg-zinc-950 flex flex-col selection:bg-amber-400 selection:text-zinc-950 ${themeClass}`}>
+  <div 
+  className={`min-h-screen bg-zinc-950 flex flex-col selection:bg-amber-400 selection:text-zinc-950 ${themeClass}`}
+  style={themeClass === 'theme-gold' ? { border: '5px solid gold', boxShadow: '0 0 20px gold' } : {}}
+>
       
       {/* Dynamic Navigation Header */}
       <Header
