@@ -4,12 +4,12 @@
  */
 
 import { RegisteredUser } from './types';
-import sobreNosotrosHeroImg from './assets/images/regenerated_image_1781878990398.png';
-import experiencia360HeroImg from './assets/images/regenerated_image_1781874165399.webp';
-import regeneratedSpaImg from './assets/images/regenerated_image_1781971134303.png';
-import userFacialMaskImg from './assets/images/regenerated_image_1781878935328.png';
-import userCurlyHairImg from './assets/images/regenerated_image_1782233615953.jpg';
-import newHeroBackgroundImg from './assets/images/regenerated_image_1782236257726.png';
+import sobreNosotrosHeroImg from './assets/images/about_hero.png';
+import experiencia360HeroImg from './assets/images/exp_360_hero.webp';
+import regeneratedSpaImg from './assets/images/service_spa.png';
+import userFacialMaskImg from './assets/images/service_facial.png';
+import userCurlyHairImg from './assets/images/service_curly.jpg';
+import newHeroBackgroundImg from './assets/images/hero_bg.png';
 // Local copies of images (previously hosted on external URLs)
 import localLogoBlack from './assets/images/xlmx_minimal_logo_1781878879402.jpg';
 import localServicioDomicilioHero from './assets/images/servicioDomicilioHero.jpg';
