@@ -77,13 +77,12 @@ const handleLogoutClient = () => {
     setCurrentScreen('home'); // Te manda al home al cerrar sesión
   };
 
-  const currentMembership = loggedInClient?.membership?.toLowerCase() || '';
+  const rawMembership = loggedInClient?.membership?.toLowerCase() || '';
 
   const themeClass = 
-    currentMembership === 'gold' ? 'theme-gold' :
-    currentMembership === 'plata' ? 'theme-plata' :
-    currentMembership === 'bronce' ? 'theme-bronce' : '';
-
+    rawMembership.includes('gold') ? 'theme-gold' :
+    rawMembership.includes('plata') ? 'theme-plata' :
+    rawMembership.includes('bronce') ? 'theme-bronce' : '';
   return (
     <div className={`min-h-screen bg-zinc-950 flex flex-col selection:bg-amber-400 selection:text-zinc-950 ${themeClass}`}>
       
