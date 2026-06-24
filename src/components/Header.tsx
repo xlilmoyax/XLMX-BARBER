@@ -228,17 +228,15 @@ export default function Header({
           <div className="flex items-center gap-4">
             {/* Desktop Action buttons (Register / Book) */}
             <div id="desktop-nav-actions" className="hidden lg:flex items-center">
-              <button
+              <a
                 id="header-cta-register"
-                onClick={() => onNavigate('registro')}
-                className={`px-5 py-2 rounded text-xs uppercase tracking-widest font-bold transition-all duration-300 cursor-pointer ${
-                  currentScreen === 'registro'
-                    ? 'bg-amber-400 text-zinc-950 shadow-md shadow-amber-400/25'
-                    : 'bg-amber-500 text-zinc-950 hover:bg-amber-400 hover:shadow-md hover:shadow-amber-500/10'
-                }`}
+                href="https://api.whatsapp.com/send?phone=543516851403&text=Hola%20Mati%2C%20quiero%20reservar%20un%20turno%2C%20Mi%20nombre%20es"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`px-5 py-2 rounded text-xs uppercase tracking-widest font-bold transition-all duration-300 cursor-pointer bg-amber-500 text-zinc-950 hover:bg-amber-400 hover:shadow-md hover:shadow-amber-500/10`}
               >
                 RESERVAR
-              </button>
+              </a>
             </div>
 
             {/* Mobile Menu trigger (>= 44px for safe touch metrics) */}
