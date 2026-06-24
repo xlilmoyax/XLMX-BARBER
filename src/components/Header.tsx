@@ -263,7 +263,7 @@ export default function Header({
                 href="https://api.whatsapp.com/send?phone=543516851403&text=Hola%20Mati%2C%20quiero%20reservar%20un%20turno%2C%20Mi%20nombre%20es"
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`px-5 py-2 rounded text-xs uppercase tracking-widest font-bold transition-all duration-300 cursor-pointer bg-amber-500 text-zinc-950 hover:bg-amber-400 hover:shadow-md hover:shadow-amber-500/10`}
+                className={`px-5 py-2 rounded text-xs uppercase tracking-widest font-bold transition-all duration-300 cursor-pointer bg-amber-500 text-zinc-950 hover:bg-amber-400 hover:shadow-md hover:shadow-amber-500/10 btn-premium`}
               >
                 RESERVAR
               </a>
