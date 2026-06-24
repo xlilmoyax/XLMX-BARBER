@@ -1,10 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Hanken+Grotesk:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
-
-@theme {
+:root {
   --font-sans: "Hanken Grotesk", ui-sans-serif, system-ui;
   --font-display: "Libre Caslon Text", serif;
-  
+
   --color-primary: #e9c176;
   --color-primary-container: #c5a059;
   --color-background: #0d0d0d;
@@ -49,4 +48,46 @@ body {
   background: rgba(17, 17, 17, 0.92);
   border-bottom: 2px solid #cd7f32;
   box-shadow: 0 0 18px rgba(205, 127, 50, 0.18);
+}
+
+/* --- TEMAS DE MEMBRESÍA XLMX --- */
+
+/* 1. EFECTOS GOLD */
+.theme-gold .btn-premium {
+  background: linear-gradient(to right, #eab308, #fbbf24, #d97706) !important;
+  color: #000000 !important;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+}
+.theme-gold .card-premium {
+  border: 1px solid #eab308 !important;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.15);
+}
+.theme-gold .text-premium {
+  color: #fbbf24 !important;
+}
+
+/* 2. EFECTOS PLATA */
+.theme-plata .btn-premium {
+  background: linear-gradient(to right, #d1d5db, #f4f4f5, #9ca3af) !important;
+  color: #000000 !important;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
+}
+.theme-plata .card-premium {
+  border: 1px solid #d1d5db !important;
+}
+.theme-plata .text-premium {
+  color: #f4f4f5 !important;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+}
+
+/* 3. EFECTOS BRONCE */
+.theme-bronce .btn-premium {
+  background: linear-gradient(to right, #b45309, #ea580c, #78350f) !important;
+  color: #ffffff !important;
+}
+.theme-bronce .card-premium {
+  border: 1px solid #b45309 !important;
+}
+.theme-bronce .text-premium {
+  color: #ea580c !important;
 }
