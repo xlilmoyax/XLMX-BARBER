@@ -5,7 +5,7 @@
 
 import React, { useEffect } from 'react';
 import { Screen } from '../types';
-import { Tag, Coins, CalendarCheck, ArrowRight, Award, Share2, Mail, MapPin, Clock, Phone, Instagram } from 'lucide-react';
+import { Crown, Sparkles, Gamepad2, ArrowRight, Award, Share2, Mail, MapPin, Clock, Phone, Instagram } from 'lucide-react';
 import { IMAGES } from '../data';
 
 interface HomeViewProps {
@@ -86,53 +86,53 @@ export default function HomeView({ onNavigate }: HomeViewProps) {
         </div>
       </section>
 
-      {/* 2. ¿Qué encontrarás aquí? Section */}
+      {/* 2. Afiliación Exclusiva Section */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1200px] mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
           <div>
             <h2 className="font-display text-2xl sm:text-3xl text-[#e9c176] uppercase mb-8 border-l-4 border-[#e9c176] pl-6 tracking-wide">
-              ¿Qué encontrarás aquí?
+              Afiliación Exclusiva para Miembros VIP
             </h2>
             <div className="space-y-10">
               
               <div className="group flex gap-6">
                 <div className="flex-shrink-0 mt-1">
-                  <Tag className="text-[#e9c176] w-7 h-7" />
+                  <Crown className="text-[#e9c176] w-7 h-7" />
                 </div>
                 <div>
                   <h3 className="font-display text-lg sm:text-xl text-[#e2e2e2] mb-2 font-semibold">
-                    Promociones y beneficios exclusivos
+                    Sistema de Afiliación XLMX
                   </h3>
                   <p className="font-sans text-sm sm:text-base text-[#d1c5b4] leading-relaxed">
-                    Formá parte de nuestra comunidad y accedé a descuentos preferenciales y eventos pensados únicamente para nuestros miembros VIP.
+                    Formá parte de nuestra comunidad selecta y accedé a beneficios de primer nivel, cobros automatizados, descuentos preferenciales y prioridad absoluta en tus reservas.
                   </p>
                 </div>
               </div>
 
               <div className="group flex gap-6">
                 <div className="flex-shrink-0 mt-1">
-                  <Coins className="text-[#e9c176] w-7 h-7" />
+                  <Sparkles className="text-[#e9c176] w-7 h-7" />
                 </div>
                 <div>
                   <h3 className="font-display text-lg sm:text-xl text-[#e2e2e2] mb-2 font-semibold">
-                    Listas de precios actualizadas
+                    Servicios Premium Exclusivos
                   </h3>
                   <p className="font-sans text-sm sm:text-base text-[#d1c5b4] leading-relaxed">
-                    Transparencia total en cada uno de nuestros servicios. Consultá nuestras tarifas vigentes de manera rápida y sencilla.
+                    Acceso a tratamientos de vanguardia, eventos privados y experiencias diseñadas especialmente para llevar el cuidado de tu imagen personal al siguiente nivel.
                   </p>
                 </div>
               </div>
 
               <div className="group flex gap-6">
                 <div className="flex-shrink-0 mt-1">
-                  <CalendarCheck className="text-[#e9c176] w-7 h-7" />
+                  <Gamepad2 className="text-[#e9c176] w-7 h-7" />
                 </div>
                 <div>
                   <h3 className="font-display text-lg sm:text-xl text-[#e2e2e2] mb-2 font-semibold">
-                    Novedades y horarios especiales
+                    Lounge y Entretenimiento VIP
                   </h3>
                   <p className="font-sans text-sm sm:text-base text-[#d1c5b4] leading-relaxed">
-                    Mantenete al tanto de nuestros horarios extendidos, aperturas en días festivos y todas las noticias del mundo XLMX.
+                    Relajate al máximo antes o durante tu servicio. Disfrutá de nuestra zona gamer con PlayStation 3 y acceso ilimitado a tus plataformas de streaming favoritas.
                   </p>
                 </div>
               </div>
