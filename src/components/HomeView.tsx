@@ -62,7 +62,7 @@ export default function HomeView({ onNavigate }: HomeViewProps) {
           <h1 className="font-display text-4xl sm:text-6xl md:text-[64px] text-white mb-6 leading-tight tracking-tight uppercase drop-shadow-[0_4px_16px_rgba(0,0,0,0.6)]">
             Bienvenido a <span className="text-[#e9c176]">XLMX</span>
           </h1>
-          <p className="font-sans text-lg md:text-xl text-[#d1c5b4] mb-10 max-w-3xl mx-auto leading-relaxed drop-shadow-[0_2px_10px_rgba(0,0,0,0.7)]">
+          <p className="font-sans text-lg md:text-xl text-white font-medium mb-10 max-w-3xl mx-auto leading-relaxed drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
             Centro Especializado en Optimización y Cuidado de tu Imagen. Más que una barbería: tu comunidad exclusiva para una experiencia premium en el cuidado de tu imagen personal.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
