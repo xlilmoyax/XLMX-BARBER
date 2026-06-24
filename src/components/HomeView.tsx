@@ -190,7 +190,7 @@ export default function HomeView({ onNavigate }: HomeViewProps) {
               className="col-span-12 md:col-span-6 group relative overflow-hidden h-[400px] rounded-[0.125rem] border border-[#4e4639]/30 text-left cursor-pointer"
             >
               <img 
-                className="w-full h-full object-cover object-bottom transition-transform duration-700 group-hover:scale-105" 
+                className="w-full h-full object-cover object-[center_60%] transition-transform duration-700 group-hover:scale-105" 
                 alt="Aplicación de máscara facial e hidratante" 
                 src={IMAGES.serviceBentoFacial}
                 referrerPolicy="no-referrer"
