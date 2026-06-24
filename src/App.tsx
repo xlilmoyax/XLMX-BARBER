@@ -72,7 +72,9 @@ useEffect(() => {
     setIsAdminLoggedIn(false);
   };
 
-  const handleLogoutClient = () => {
+const handleLogoutClient = () => {
+    setLoggedInClient(null);
+    setCurrentScreen('home'); // Te manda al home al cerrar sesión
   };
 
   const currentMembership = loggedInClient?.membership?.toLowerCase() || '';
