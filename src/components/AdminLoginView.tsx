@@ -52,17 +52,11 @@ export default function AdminLoginView({
   const [isShaking, setIsShaking] = useState(false);
 
   // Client email/phone verification login
-  const handleClientLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!clientEmail.trim()) {
-      setClientErrorMsg('Por favor introduce tu correo electrónico.');
-      return;
-    }
+ const handleClientLogin = (e: React.FormEvent) => {
+    e.preventDefault(); // 👈 Súper importante para que no se recargue la página
     
-    // Search in registered list of clients
-    const found = users.find(
-      u => u.email.trim().toLowerCase() === clientEmail.trim().toLowerCase()
-    );
+    // Buscamos el correo que ingresó el usuario dentro de nuestros INITIAL_USERS
+    const found = users.find(u => u.email.trim().toLowerCase() === clientEmail.trim().toLowerCase());
 
     if (found) {
       setClientErrorMsg(null);
