@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Screen, RegisteredUser } from './types';
 import { INITIAL_USERS } from './data';
 import Header from './components/Header';
@@ -21,10 +21,26 @@ import LegalView from './components/LegalView';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
-  const [users, setUsers] = useState<RegisteredUser[]>(INITIAL_USERS);
+const [users, setUsers] = useState<RegisteredUser[]>(() => {
+    const savedUsers = localStorage.getItem('xlmx_users');
+    return savedUsers ? JSON.parse(savedUsers) : INITIAL_USERS;
+  });
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(false);
-  const [loggedInClient, setLoggedInClient] = useState<RegisteredUser | null>(null);
+const [loggedInClient, setLoggedInClient] = useState<RegisteredUser | null>(() => {
+    const savedClient = localStorage.getItem('xlmx_logged_client');
+    return savedClient ? JSON.parse(savedClient) : null;
+  });
+useEffect(() => {
+    localStorage.setItem('xlmx_users', JSON.stringify(users));
+  }, [users]);
 
+  useEffect(() => {
+    if (loggedInClient) {
+      localStorage.setItem('xlmx_logged_client', JSON.stringify(loggedInClient));
+    } else {
+      localStorage.removeItem('xlmx_logged_client');
+    }
+  }, [loggedInClient]);
   // Navigation controller
   const handleNavigate = (screen: Screen) => {
     // If user tries to access administrator dashboard directly but is not authenticated
@@ -57,11 +73,17 @@ export default function App() {
   };
 
   const handleLogoutClient = () => {
-    setLoggedInClient(null);
   };
 
+  const currentMembership = loggedInClient?.membership?.toLowerCase() || '';
+
+  const themeClass = 
+    currentMembership === 'gold' ? 'theme-gold' :
+    currentMembership === 'plata' ? 'theme-plata' :
+    currentMembership === 'bronce' ? 'theme-bronce' : '';
+
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col selection:bg-amber-400 selection:text-zinc-950">
+    <div className={`min-h-screen bg-zinc-950 flex flex-col selection:bg-amber-400 selection:text-zinc-950 ${themeClass}`}>
       
       {/* Dynamic Navigation Header */}
       <Header
