@@ -25,6 +25,7 @@ import localSalonToolsGreyScale from './assets/images/salonToolsGreyScale.jpg';
 import localServiceBento360 from './assets/images/serviceBento360.jpg';
 import localServiceBentoDomicilio from './assets/images/serviceBentoDomicilio.jpg';
 import localLatestNewsPost from './assets/images/latestNewsPost.jpg';
+import sirFaustoMaskImg from './assets/images/sir_fausto_mask.jpg';
 
 // Let's keep the initial registered clients list completely empty on startup
 export const INITIAL_USERS: RegisteredUser[] = [];
@@ -55,7 +56,7 @@ export const IMAGES = {
   // Process steps micro-photography
   micellarWater: localMicellarWater,
   exfoliatingGel: localExfoliatingGel,
-  maskFace: userFacialMaskImg,
+  maskFace: sirFaustoMaskImg,
   faceResults: localFaceResults,
 
   // Screen 6: Membresías Hero
