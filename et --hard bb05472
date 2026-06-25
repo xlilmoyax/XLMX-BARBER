@@ -1,0 +1,42 @@
+[33m33f47ad[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m fix
+[33m55b334e[m fix
+[33m86f5058[m fix
+[33m75de932[m fix
+[33m0b406ac[m fix
+[33m6ce7007[m fix
+[33m3343e11[m fix: persistencia de sesion administrativa con localStorage
+[33m6aff6de[m fix: mover variable de clase al className y borrar texto residual
+[33m18edf17[m fix: eliminar fondo oscuro del contenedor header
+[33m6d924ad[m fix: limpieza absoluta de estilos en botones de header
+[33mfda0389[m style: forzar transparencia total en botones de header
+[33m6d342a5[m fix: eliminar error de sintaxis en CSS y limpiar fondos de botones
+[33mb20a4dc[m style: limpieza total de fondos en header
+[33mf28becb[m style: eliminar cajas de fondo y limpiar header
+[33me5dde3b[m style: eliminar cajas negras de fondo, mantener información y colores
+[33m1bd4027[m style: convertir etiquetas de membresía en texto simple sin fondo
+[33mcbb5bbe[m style: eliminar bordes invasivos, mantener brillo dorado
+[33m9cc900f[m style: eliminar bordes y subrayados invasivos del header
+[33mada2be2[m style: eliminar bordes dorados del contenedor y limpiar estilos de imágenes
+[33m35b71d4[m style: eliminar bordes invasivos de la pantalla y ajustar sutilidad
+[33me94c1eb[m[33m ([m[1;31morigin/respaldo-estilos-membresia[m[33m, [m[1;32mrespaldo-estilos-membresia[m[33m)[m test: forzar estilo inline para diagnostico
+[33m4b508db[m feat: corregir sintaxis y habilitar aspecto premium para cualquier cliente gold
+[33maf69ace[m style: forzar especificidad de tema gold sobre Tailwind
+[33m797ffa0[m fix: corregir llave de cierre duplicada en handleLogoutClient
+[33ma434176[m style: añadir efectos fluor y bordes iluminados para el tema gold
+[33mbb05472[m feat: agregar hooks useEffect para persistencia en localStorage
+[33mf574aa1[m fix: corregir variables de tema en css
+[33m566b63b[m fix: corregir variables de tema en css
+[33md922fc1[m fix: corregir variables de tema en css
+[33m7d6860e[m feat: interfaz dinamica para membresias
+[33mcb4298a[m feat: agregar estilos dinámicos de membresía
+[33m4a5de0d[m UI: Cambiar botón RESERVAR en el header (desktop) para abrir WhatsApp directamente
+[33m4d3d107[m Content: Agregar imagen real de mascarilla Sir Fausto para el paso 3 de limpieza facial
+[33m86cd740[m UI: Cambiar el color del subtítulo del Hero a blanco para mayor legibilidad
+[33mf0e73bb[m Content: Actualizar sección 'Afiliación Exclusiva para Miembros VIP'
+[33mce3dcfd[m UI: Ajustar encuadre de la imagen del servicio facial
+[33mb737613[m Fix: Rename auto-generated image filenames to avoid adblocker issues
+[33m87c3494[m Fix: save all images locally, remove expired external URLs
+[33mdb0ce7f[m Add Google Search Console verification file
+[33m5d3dfcf[m SEO: mejorar meta tags para Google
+[33m56bcbf1[m Add package-lock.json for CI
+[33mfb5b90c[m Initial commit - XLMX Barber website
