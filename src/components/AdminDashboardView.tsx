@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { Screen, RegisteredUser } from '../types';
 import { 
   Users, UserCheck, ShieldAlert, Trash2, Search, PlusCircle, 
-  Download, LogOut, Check, Sparkles, RefreshCw, Layers, Calendar
+  Download, LogOut, Check, Sparkles, RefreshCw, Pencil, Layers, Calendar
 } from 'lucide-react';
 
 interface AdminDashboardViewProps {
@@ -462,19 +462,32 @@ export default function AdminDashboardView({
                       </div>
                     </td>
 
-                    <td className="p-4 text-center">
-                      <button
-                        onClick={() => {
-                          if (confirm(`¿Está seguro de eliminar permanentemente al cliente ${u.fullname} de la base de datos de Córdoba?`)) {
-                            onDeleteUser(u.id);
-                          }
-                        }}
-                        className="p-2 bg-zinc-950/80 hover:bg-red-950/40 border border-zinc-800 hover:border-red-800/40 text-zinc-500 hover:text-red-400 rounded transition-colors cursor-pointer"
-                        title="Eliminar Registro definitivo"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </td>
+<td className="p-4 text-center flex items-center justify-center gap-2">
+  {/* Botón de Edición (Lápiz) */}
+  <button
+    onClick={() => {
+      // Aquí conectaremos el formulario de edición más adelante
+      console.log("Editar usuario:", u.id);
+    }}
+    className="p-2 bg-zinc-950/80 hover:bg-amber-950/40 border border-zinc-800 hover:border-amber-800/40 text-zinc-500 hover:text-amber-400 rounded transition-colors cursor-pointer"
+    title="Editar datos del cliente"
+  >
+    <Pencil className="w-4 h-4" />
+  </button>
+
+  {/* Botón de Eliminar */}
+  <button
+    onClick={() => {
+      if (confirm(`¿Está seguro de eliminar permanentemente al cliente ${u.fullname}?`)) {
+        onDeleteUser(u.id);
+      }
+    }}
+    className="p-2 bg-zinc-950/80 hover:bg-red-950/40 border border-zinc-800 hover:border-red-800/40 text-zinc-500 hover:text-red-400 rounded transition-colors cursor-pointer"
+    title="Eliminar Registro definitivo"
+  >
+    <Trash2 className="w-4 h-4" />
+  </button>
+</td>
 
                   </tr>
                 ))}
