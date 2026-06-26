@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -25,7 +25,9 @@ const [users, setUsers] = useState<RegisteredUser[]>(() => {
     const savedUsers = localStorage.getItem('xlmx_users');
     return savedUsers ? JSON.parse(savedUsers) : INITIAL_USERS;
   });
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(false);
+const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(() => {
+  return localStorage.getItem('xlmx_admin_logged') === 'true';
+});
 const [loggedInClient, setLoggedInClient] = useState<RegisteredUser | null>(() => {
     const savedClient = localStorage.getItem('xlmx_logged_client');
     return savedClient ? JSON.parse(savedClient) : null;
@@ -64,13 +66,15 @@ useEffect(() => {
     }
   };
 
-  const handleLoginSuccess = () => {
-    setIsAdminLoggedIn(true);
-  };
+const handleLoginSuccess = () => {
+  setIsAdminLoggedIn(true);
+  localStorage.setItem('xlmx_admin_logged', 'true');
+};
 
-  const handleLogoutAdmin = () => {
-    setIsAdminLoggedIn(false);
-  };
+const handleLogoutAdmin = () => {
+  setIsAdminLoggedIn(false);
+  localStorage.removeItem('xlmx_admin_logged');
+};
 
   const handleLogoutClient = () => {
   };
