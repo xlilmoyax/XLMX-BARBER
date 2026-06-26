@@ -16,6 +16,7 @@ interface AdminDashboardViewProps {
   onDeleteUser: (userId: string) => void;
   onLogout: () => void;
   onNavigate: (screen: Screen) => void;
+  onUpdateUser: (updatedUser: RegisteredUser) => void;
 }
 
 export default function AdminDashboardView({
@@ -24,6 +25,7 @@ export default function AdminDashboardView({
   onDeleteUser,
   onLogout,
   onNavigate,
+  onUpdateUser,
 }: AdminDashboardViewProps) {
   // Search and Filter States
   const [searchTerm, setSearchTerm] = useState('');
@@ -37,7 +39,7 @@ export default function AdminDashboardView({
   const [newPhone, setNewPhone] = useState('');
   const [newIsSocio, setNewIsSocio] = useState(false);
   const [newMembership, setNewMembership] = useState<'bronce' | 'plata' | 'gold' | 'ninguno'>('ninguno');
-
+const [editingUser, setEditingUser] = useState<RegisteredUser | null>(null);
   // Synchronize alert trigger state
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncDone, setSyncDone] = useState(true);
@@ -464,16 +466,13 @@ export default function AdminDashboardView({
 
 <td className="p-4 text-center flex items-center justify-center gap-2">
   {/* Botón de Edición (Lápiz) */}
-  <button
-    onClick={() => {
-      // Aquí conectaremos el formulario de edición más adelante
-      console.log("Editar usuario:", u.id);
-    }}
-    className="p-2 bg-zinc-950/80 hover:bg-amber-950/40 border border-zinc-800 hover:border-amber-800/40 text-zinc-500 hover:text-amber-400 rounded transition-colors cursor-pointer"
-    title="Editar datos del cliente"
-  >
-    <Pencil className="w-4 h-4" />
-  </button>
+ <button
+  onClick={() => setEditingUser(u)} // Cambiamos el log por el estado
+  className="p-2 bg-zinc-950/80 hover:bg-amber-950/40 border border-zinc-800 hover:border-amber-800/40 text-zinc-500 hover:text-amber-400 rounded transition-colors cursor-pointer"
+  title="Editar datos del cliente"
+>
+  <Pencil className="w-4 h-4" />
+</button>
 
   {/* Botón de Eliminar */}
   <button
@@ -496,7 +495,61 @@ export default function AdminDashboardView({
           )}
         </div>
       </div>
+{/* Modal de Edición */}
+{editingUser && (
+  <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 animate-fadeIn">
+    <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-lg w-full max-w-md space-y-4">
+      <h2 className="text-white font-bold text-lg uppercase tracking-wider">Editar Cliente</h2>
+      
+      <div className="space-y-3">
+        <div>
+          <label className="text-[10px] text-zinc-500 uppercase">Nombre</label>
+          <input 
+            className="w-full bg-zinc-950 border border-zinc-800 p-2 rounded text-white text-sm"
+            value={editingUser.fullname}
+            onChange={(e) => setEditingUser({...editingUser, fullname: e.target.value})}
+          />
+        </div>
+        <div>
+          <label className="text-[10px] text-zinc-500 uppercase">Email</label>
+          <input 
+            className="w-full bg-zinc-950 border border-zinc-800 p-2 rounded text-white text-sm"
+            value={editingUser.email}
+            onChange={(e) => setEditingUser({...editingUser, email: e.target.value})}
+          />
+        </div>
+        <div>
+          <label className="text-[10px] text-zinc-500 uppercase">Teléfono</label>
+          <input 
+            className="w-full bg-zinc-950 border border-zinc-800 p-2 rounded text-white text-sm"
+            value={editingUser.phone}
+            onChange={(e) => setEditingUser({...editingUser, phone: e.target.value})}
+          />
+        </div>
+      </div>
 
+      <div className="flex gap-2 pt-4">
+        <button 
+          onClick={() => setEditingUser(null)}
+          className="flex-1 py-2 rounded bg-zinc-800 text-white font-bold text-xs"
+        >
+          CANCELAR
+        </button>
+        <button 
+  onClick={() => {
+    if (editingUser) {
+      onUpdateUser(editingUser); // Aquí enviamos los datos actualizados
+      setEditingUser(null);      // Cerramos el modal
+    }
+  }}
+  className="flex-1 py-2 rounded bg-amber-400 text-zinc-950 font-bold text-xs"
+>
+  GUARDAR CAMBIOS
+</button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }

@@ -58,6 +58,7 @@ useEffect(() => {
   const handleAddUser = (newUser: RegisteredUser) => {
     setUsers((prev) => [newUser, ...prev]);
   };
+  
 
   const handleDeleteUser = (userId: string) => {
     setUsers((prev) => prev.filter((u) => u.id !== userId));
@@ -65,6 +66,9 @@ useEffect(() => {
       setLoggedInClient(null);
     }
   };
+  const handleUpdateUser = (updatedUser: RegisteredUser) => {
+  setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
+};
 
 const handleLoginSuccess = () => {
   setIsAdminLoggedIn(true);
@@ -81,6 +85,7 @@ const handleLogoutClient = () => {
     localStorage.removeItem('xlmx_logged_client');
   };
   const currentMembership = loggedInClient?.membership?.toLowerCase() || '';
+  
 
   const themeClass = 
     currentMembership === 'gold' ? 'theme-gold' :
@@ -155,6 +160,7 @@ const handleLogoutClient = () => {
             users={users}
             onAddUser={handleAddUser}
             onDeleteUser={handleDeleteUser}
+            onUpdateUser={handleUpdateUser}
             onLogout={handleLogoutAdmin}
             onNavigate={handleNavigate}
           />
