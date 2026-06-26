@@ -201,34 +201,40 @@ export default function Header({
                 </button>
               </div>
             ) : loggedInClient ? (
-              <div className="flex items-center gap-3 pl-1 border-l border-zinc-800">
-                {/* Nombre del Cliente */}
-        {/* Nombre del Cliente */}
-          <span className="text-xs tracking-widest uppercase font-bold text-zinc-300">
-            {loggedInClient.fullname.split(' ')[0].toUpperCase()}
-          </span>
-
-          {/* Etiqueta de Membresía */}
-          <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-md ${
-            clientMembership === 'gold'
-              ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-black'
-              : clientMembership === 'plata'
-              ? 'bg-gradient-to-r from-gray-300 to-gray-500 text-black'
-              : 'bg-gradient-to-r from-amber-700 to-orange-600 text-black'
-          }`}>
-            👑 {clientMembership?.toUpperCase() || 'BRONCE'}
-          </span>
-
-                {/* Botón Salir */}
+            <div className="flex items-center gap-3 pl-1 border-l border-zinc-800">
+              
+              {/* Nombre del Cliente (Clicable para ir al perfil) */}
               <button
-            id="desktop-nav-client-logout"
-            onClick={(e) => { e.preventDefault(); onLogoutClient(); }}
-            className="text-xs tracking-widest uppercase font-bold text-zinc-500 hover:text-zinc-300 transition-all cursor-pointer pb-1 border-b-2 border-transparent ml-2"
-            title="Cerrar Sesión"
-          >
-            SALIR
-          </button>
-              </div>
+                onClick={() => onNavigate('login-admin')}
+                className="text-xs tracking-widest uppercase font-bold text-zinc-300 hover:text-amber-400 transition-all cursor-pointer border-b-2 border-transparent hover:border-amber-400 pb-0.5"
+              >
+                {loggedInClient.fullname.split(' ')[0].toUpperCase()}
+              </button>
+
+              {/* Etiqueta de Membresía */}
+              <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-md ${
+                clientMembership === 'gold'
+                  ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-black'
+                  : clientMembership === 'plata'
+                  ? 'bg-gradient-to-r from-gray-300 to-gray-500 text-black'
+                  : 'bg-gradient-to-r from-amber-700 to-orange-600 text-black'
+              }`}>
+                👑 {clientMembership?.toUpperCase() || 'BRONCE'}
+              </span>
+
+              {/* Botón Salir */}
+              <button
+                id="desktop-nav-client-logout"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onLogoutClient();
+                }}
+                className="text-xs tracking-widest uppercase font-bold text-zinc-500 hover:text-zinc-300 transition-all cursor-pointer pb-0.5 border-b-2 border-transparent"
+                title="Cerrar Sesión"
+              >
+                SALIR
+              </button>
+            </div>
             ) : (
               <button
                 id="desktop-nav-login"
