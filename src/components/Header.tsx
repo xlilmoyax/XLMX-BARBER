@@ -203,37 +203,31 @@ export default function Header({
             ) : loggedInClient ? (
               <div className="flex items-center gap-3 pl-1 border-l border-zinc-800">
                 {/* Nombre del Cliente */}
-                <button
-                  id="desktop-nav-client"
-                  onClick={() => onNavigate('login-admin')}
-                  className={`text-xs tracking-widest uppercase font-bold transition-all duration-200 hover:text-amber-300 pb-1 border-b-2 flex items-center gap-1.5 ${
-                    currentScreen === 'login-admin' ? 'text-amber-400 border-amber-400' : 'text-zinc-400 border-transparent'
-                  }`}
-                >
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  MI PERFIL ({loggedInClient.fullname.split(' ')[0].toUpperCase()})
-                </button>
+        {/* Nombre del Cliente */}
+          <span className="text-xs tracking-widest uppercase font-bold text-zinc-300">
+            {loggedInClient.fullname.split(' ')[0].toUpperCase()}
+          </span>
 
-                {/* Etiqueta de Membresía */}
-                <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-md ${
-                  clientMembership === 'gold'
-                    ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-black'
-                    : clientMembership === 'plata'
-                    ? 'bg-gradient-to-r from-gray-300 to-gray-500 text-black'
-                    : 'bg-gradient-to-r from-amber-700 to-orange-600 text-black'
-                }`}>
-                  👑 {clientMembership?.toUpperCase() || 'BRONCE'}
-                </span>
+          {/* Etiqueta de Membresía */}
+          <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-md ${
+            clientMembership === 'gold'
+              ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-black'
+              : clientMembership === 'plata'
+              ? 'bg-gradient-to-r from-gray-300 to-gray-500 text-black'
+              : 'bg-gradient-to-r from-amber-700 to-orange-600 text-black'
+          }`}>
+            👑 {clientMembership?.toUpperCase() || 'BRONCE'}
+          </span>
 
                 {/* Botón Salir */}
-                <button
-                  id="desktop-nav-client-logout"
-                  onClick={onLogoutClient}
-                  className="text-xs tracking-widest uppercase font-bold text-zinc-500 hover:text-zinc-300 transition-all cursor-pointer pb-1 border-b-2 border-transparent"
-                  title="Cerrar Sesión"
-                >
-                  SALIR
-                </button>
+              <button
+            id="desktop-nav-client-logout"
+            onClick={(e) => { e.preventDefault(); onLogoutClient(); }}
+            className="text-xs tracking-widest uppercase font-bold text-zinc-500 hover:text-zinc-300 transition-all cursor-pointer pb-1 border-b-2 border-transparent ml-2"
+            title="Cerrar Sesión"
+          >
+            SALIR
+          </button>
               </div>
             ) : (
               <button
