@@ -76,9 +76,10 @@ const handleLogoutAdmin = () => {
   localStorage.removeItem('xlmx_admin_logged');
 };
 
-  const handleLogoutClient = () => {
+const handleLogoutClient = () => {
+    setLoggedInClient(null);
+    localStorage.removeItem('xlmx_logged_client');
   };
-
   const currentMembership = loggedInClient?.membership?.toLowerCase() || '';
 
   const themeClass = 
