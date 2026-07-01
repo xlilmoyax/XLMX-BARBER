@@ -57,7 +57,6 @@ useEffect(() => {
 
   // User management hooks
 const handleAddUser = (newUser: RegisteredUser) => {
-  console.log("DEBUG: La función handleAddUser se ha activado"); // <--- Esto es clave
   setUsers((prev) => [newUser, ...prev]);
 
   const templateParams = {
@@ -67,16 +66,15 @@ const handleAddUser = (newUser: RegisteredUser) => {
     fecha: new Date().toLocaleDateString(),
   };
 
- emailjs.send(
-  'service_ta0f47t', 
-  'template_9c1f548', // <--- Cambiado a este nuevo ID
-  templateParams, 
-  'Oql46z_LFLkAI8_DE'
-).then((response) => {
-  console.log('SUCCESS!', response.status, response.text);
-}).catch((err) => {
-  console.error('FAILED...', err);
-});
+  // 1. Correo para el ADMINISTRADOR
+  emailjs.send('service_ta0f47t', 'template_9c1f548', templateParams, 'Oql46z_LFLkAI8_DE')
+    .then((response) => console.log('Admin notificado:', response.status))
+    .catch((err) => console.error('Error admin:', err));
+
+  // 2. Correo de BIENVENIDA para el CLIENTE
+  emailjs.send('service_ta0f47t', 'template_16q07to', templateParams, 'Oql46z_LFLkAI8_DE')
+    .then((response) => console.log('Cliente bienvenido:', response.status))
+    .catch((err) => console.error('Error cliente:', err));
 };
 
   const handleDeleteUser = (userId: string) => {
