@@ -67,16 +67,16 @@ const handleAddUser = (newUser: RegisteredUser) => {
     fecha: new Date().toLocaleDateString(),
   };
 
-  emailjs.send(
-    'service_ta0f47t', 
-    'template_0nxnqtl', 
-    templateParams, 
-    'Oql46z_LFLkAI8_DE'
-  ).then((response) => {
-    console.log('SUCCESS!', response.status, response.text);
-  }).catch((err) => {
-    console.error('FAILED...', err); // <--- Si hay un error, aparecerá aquí
-  });
+ emailjs.send(
+  'service_ta0f47t', 
+  'template_9c1f548', // <--- Cambiado a este nuevo ID
+  templateParams, 
+  'Oql46z_LFLkAI8_DE'
+).then((response) => {
+  console.log('SUCCESS!', response.status, response.text);
+}).catch((err) => {
+  console.error('FAILED...', err);
+});
 };
 
   const handleDeleteUser = (userId: string) => {
