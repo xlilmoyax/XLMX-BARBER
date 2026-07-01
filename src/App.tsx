@@ -18,6 +18,7 @@ import RegistroView from './components/RegistroView';
 import AdminLoginView from './components/AdminLoginView';
 import AdminDashboardView from './components/AdminDashboardView';
 import LegalView from './components/LegalView';
+import emailjs from '@emailjs/browser';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
@@ -55,10 +56,28 @@ useEffect(() => {
   };
 
   // User management hooks
-  const handleAddUser = (newUser: RegisteredUser) => {
-    setUsers((prev) => [newUser, ...prev]);
+const handleAddUser = (newUser: RegisteredUser) => {
+  console.log("DEBUG: La función handleAddUser se ha activado"); // <--- Esto es clave
+  setUsers((prev) => [newUser, ...prev]);
+
+  const templateParams = {
+    nombre: newUser.fullname,
+    email: newUser.email,
+    telefono: newUser.phone,
+    fecha: new Date().toLocaleDateString(),
   };
-  
+
+  emailjs.send(
+    'service_ta0f47t', 
+    'template_0nxnqtl', 
+    templateParams, 
+    'Oql46z_LFLkAI8_DE'
+  ).then((response) => {
+    console.log('SUCCESS!', response.status, response.text);
+  }).catch((err) => {
+    console.error('FAILED...', err); // <--- Si hay un error, aparecerá aquí
+  });
+};
 
   const handleDeleteUser = (userId: string) => {
     setUsers((prev) => prev.filter((u) => u.id !== userId));
