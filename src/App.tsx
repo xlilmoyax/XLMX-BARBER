@@ -70,25 +70,35 @@ useEffect(() => {
   };
 
   // User management hooks
-const handleAddUser = (newUser: RegisteredUser) => {
+const handleAddUser = async (newUser: RegisteredUser) => {
   setUsers((prev) => [newUser, ...prev]);
 
-  const templateParams = {
-    nombre: newUser.fullname,
-    email: newUser.email,
-    telefono: newUser.phone,
-    fecha: new Date().toLocaleDateString(),
-  };
+  const { error } = await supabase
+    .from('users')
+    .insert([
+      {
+        id: newUser.id, // <--- ¡Asegúrate de incluir esto!
+        fullname: newUser.fullname,
+        email: newUser.email,
+        phone: newUser.phone,
+        age: newUser.age,
+        is_socio: newUser.isSocio,
+        membership: newUser.membership,
+      },
+    ]);
 
-  // 1. Correo para el ADMINISTRADOR
-  emailjs.send('service_ta0f47t', 'template_9c1f548', templateParams, 'Oql46z_LFLkAI8_DE')
-    .then((response) => console.log('Admin notificado:', response.status))
-    .catch((err) => console.error('Error admin:', err));
+  // Aquí está el bloque único de manejo de errores
+  if (error) {
+    console.error("Error al guardar en Supabase:", error.message);
+    alert("Hubo un error al guardar tus datos, intenta de nuevo.");
+  } else {
+    console.log("Usuario guardado con éxito en la nube");
+    alert("¡Registro exitoso!");
+  }
 
-  // 2. Correo de BIENVENIDA para el CLIENTE
-  emailjs.send('service_ta0f47t', 'template_16q07to', templateParams, 'Oql46z_LFLkAI8_DE')
-    .then((response) => console.log('Cliente bienvenido:', response.status))
-    .catch((err) => console.error('Error cliente:', err));
+  // ... (tu código de emailjs sigue aquí abajo)
+  const templateParams = { /* ... */ };
+  // ... resto del emailjs
 };
 
   const handleDeleteUser = (userId: string) => {
@@ -187,22 +197,14 @@ const handleLogoutClient = () => {
         )}
 
         {currentScreen === 'dashboard-admin' && (
-          <AdminDashboardView
-            users={users}
-            onAddUser={handleAddUser}
-            onDeleteUser={handleDeleteUser}
-            onUpdateUser={handleUpdateUser}
-            onLogout={handleLogoutAdmin}
-            onNavigate={handleNavigate}
-          />
-        )}
-
-        {currentScreen === 'legal' && (
-          <LegalView onNavigate={handleNavigate} />
-        )}
+  <AdminDashboardView 
+    onLogout={handleLogoutAdmin} 
+    onNavigate={handleNavigate} 
+  />
+)} 
 
       </main>
 
-    </div>
+    </div> 
   );
 }
