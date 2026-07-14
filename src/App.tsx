@@ -19,6 +19,7 @@ import AdminLoginView from './components/AdminLoginView';
 import AdminDashboardView from './components/AdminDashboardView';
 import LegalView from './components/LegalView';
 import emailjs from '@emailjs/browser';
+import { supabase } from './lib/supabaseClient';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
@@ -36,7 +37,20 @@ const [loggedInClient, setLoggedInClient] = useState<RegisteredUser | null>(() =
 useEffect(() => {
     localStorage.setItem('xlmx_users', JSON.stringify(users));
   }, [users]);
+useEffect(() => {
+  console.log("Probando conexión con Supabase...");
+  
+  const testSupabase = async () => {
+    const { data, error } = await supabase.from('users').select('*');
+    if (error) {
+      console.error("Error de conexión:", error.message);
+    } else {
+      console.log("¡Conexión exitosa! Usuarios encontrados:", data);
+    }
+  };
 
+  testSupabase();
+}, []);
   useEffect(() => {
     if (loggedInClient) {
       localStorage.setItem('xlmx_logged_client', JSON.stringify(loggedInClient));
