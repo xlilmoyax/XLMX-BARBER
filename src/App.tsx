@@ -1,11 +1,10 @@
-﻿/**
+/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
 
 import React, { useState, useEffect } from 'react';
 import { Screen, RegisteredUser } from './types';
-import { INITIAL_USERS } from './data';
 import Header from './components/Header';
 import HomeView from './components/HomeView';
 import AboutView from './components/AboutView';
@@ -18,39 +17,40 @@ import RegistroView from './components/RegistroView';
 import AdminLoginView from './components/AdminLoginView';
 import AdminDashboardView from './components/AdminDashboardView';
 import LegalView from './components/LegalView';
-import emailjs from '@emailjs/browser';
-import { supabase } from './lib/supabaseClient';
+import { supabase, mapRowToUser } from './lib/supabaseClient';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
-const [users, setUsers] = useState<RegisteredUser[]>(() => {
-    const savedUsers = localStorage.getItem('xlmx_users');
-    return savedUsers ? JSON.parse(savedUsers) : INITIAL_USERS;
+  const [users, setUsers] = useState<RegisteredUser[]>([]);
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(() => {
+    return localStorage.getItem('xlmx_admin_logged') === 'true';
   });
-const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(() => {
-  return localStorage.getItem('xlmx_admin_logged') === 'true';
-});
-const [loggedInClient, setLoggedInClient] = useState<RegisteredUser | null>(() => {
+  const [loggedInClient, setLoggedInClient] = useState<RegisteredUser | null>(() => {
     const savedClient = localStorage.getItem('xlmx_logged_client');
     return savedClient ? JSON.parse(savedClient) : null;
   });
-useEffect(() => {
-    localStorage.setItem('xlmx_users', JSON.stringify(users));
-  }, [users]);
-useEffect(() => {
-  console.log("Probando conexión con Supabase...");
-  
-  const testSupabase = async () => {
-    const { data, error } = await supabase.from('users').select('*');
-    if (error) {
-      console.error("Error de conexión:", error.message);
-    } else {
-      console.log("¡Conexión exitosa! Usuarios encontrados:", data);
-    }
-  };
 
-  testSupabase();
-}, []);
+  // Fetch initial users from Supabase on mount
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        if (data) {
+          setUsers(data.map(mapRowToUser));
+        }
+      } catch (err) {
+        console.error("Error al cargar usuarios de Supabase:", err);
+      }
+    };
+    fetchUsers();
+  }, []);
+
+  // Sync client profile state with LocalStorage
   useEffect(() => {
     if (loggedInClient) {
       localStorage.setItem('xlmx_logged_client', JSON.stringify(loggedInClient));
@@ -58,9 +58,9 @@ useEffect(() => {
       localStorage.removeItem('xlmx_logged_client');
     }
   }, [loggedInClient]);
+
   // Navigation controller
   const handleNavigate = (screen: Screen) => {
-    // If user tries to access administrator dashboard directly but is not authenticated
     if (screen === 'dashboard-admin' && !isAdminLoggedIn) {
       setCurrentScreen('login-admin');
     } else {
@@ -69,65 +69,47 @@ useEffect(() => {
     }
   };
 
-  // User management hooks
-const handleAddUser = async (newUser: RegisteredUser) => {
-  setUsers((prev) => [newUser, ...prev]);
+  // Add user locally and keep state synced
+  const handleAddUser = (newUser: RegisteredUser) => {
+    setUsers((prev) => [newUser, ...prev]);
+  };
 
-  const { error } = await supabase
-    .from('users')
-    .insert([
-      {
-        id: newUser.id, // <--- ¡Asegúrate de incluir esto!
-        fullname: newUser.fullname,
-        email: newUser.email,
-        phone: newUser.phone,
-        age: newUser.age,
-        is_socio: newUser.isSocio,
-        membership: newUser.membership,
-      },
-    ]);
+  // Delete user from Supabase and update state
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from('users')
+        .delete()
+        .eq('id', userId);
 
-  // Aquí está el bloque único de manejo de errores
-  if (error) {
-    console.error("Error al guardar en Supabase:", error.message);
-    alert("Hubo un error al guardar tus datos, intenta de nuevo.");
-  } else {
-    console.log("Usuario guardado con éxito en la nube");
-    alert("¡Registro exitoso!");
-  }
+      if (error) throw error;
 
-  // ... (tu código de emailjs sigue aquí abajo)
-  const templateParams = { /* ... */ };
-  // ... resto del emailjs
-};
-
-  const handleDeleteUser = (userId: string) => {
-    setUsers((prev) => prev.filter((u) => u.id !== userId));
-    if (loggedInClient && loggedInClient.id === userId) {
-      setLoggedInClient(null);
+      setUsers((prev) => prev.filter((u) => u.id !== userId));
+      if (loggedInClient && loggedInClient.id === userId) {
+        setLoggedInClient(null);
+      }
+    } catch (err: any) {
+      console.error("Error al eliminar usuario en Supabase:", err);
+      alert("Error al eliminar de la base de datos: " + err.message);
     }
   };
-  const handleUpdateUser = (updatedUser: RegisteredUser) => {
-  setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
-};
 
-const handleLoginSuccess = () => {
-  setIsAdminLoggedIn(true);
-  localStorage.setItem('xlmx_admin_logged', 'true');
-};
-
-const handleLogoutAdmin = () => {
-  setIsAdminLoggedIn(false);
-  localStorage.removeItem('xlmx_admin_logged');
-};
-
-const handleLogoutClient = () => {
-    setLoggedInClient(null);
-    localStorage.removeItem('xlmx_logged_client');
+  const handleLoginSuccess = () => {
+    setIsAdminLoggedIn(true);
+    localStorage.setItem('xlmx_admin_logged', 'true');
   };
+
+  const handleLogoutAdmin = () => {
+    setIsAdminLoggedIn(false);
+    localStorage.removeItem('xlmx_admin_logged');
+  };
+
+  const handleLogoutClient = () => {
+    setLoggedInClient(null);
+  };
+
   const currentMembership = loggedInClient?.membership?.toLowerCase() || '';
   
-
   const themeClass = 
     currentMembership === 'gold' ? 'theme-gold' :
     currentMembership === 'plata' ? 'theme-plata' :
@@ -197,11 +179,18 @@ const handleLogoutClient = () => {
         )}
 
         {currentScreen === 'dashboard-admin' && (
-  <AdminDashboardView 
-    onLogout={handleLogoutAdmin} 
-    onNavigate={handleNavigate} 
-  />
-)} 
+          <AdminDashboardView 
+            users={users}
+            onAddUser={handleAddUser}
+            onDeleteUser={handleDeleteUser}
+            onLogout={handleLogoutAdmin} 
+            onNavigate={handleNavigate} 
+          />
+        )} 
+
+        {currentScreen === 'legal' && (
+          <LegalView onNavigate={handleNavigate} />
+        )}
 
       </main>
 
