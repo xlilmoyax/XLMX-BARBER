@@ -56,7 +56,7 @@ return (
     {/* REEMPLAZA TU BLOQUE DE FILTRO POR ESTE: */}
     {users && users.length > 0 ? (
       users
-        .filter(user => user.fullname?.toLowerCase().includes(searchTerm.toLowerCase()))
+        .filter(user => true)
         .map(user => (
           <div key={user.id}>
              {/* Aquí va tu tarjeta de usuario */}
