@@ -1,8 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// src/lib/supabaseClient.ts
+
+// CAMBIA ESTO SOLO PARA PROBAR:
+const supabaseUrl = "https://wqzhdtsnsryfmtkyqtkd.supabase.co/rest/v1/";
+const supabaseKey = "sb_publishable_q4zdKdBOavu9Yy1hgazjuw_snWYGHq0";
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
-console.log("Supabase URL:", import.meta.env.VITE_SUPABASE_URL);
-console.log("Supabase KEY:", import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+if (!import.meta.env.VITE_SUPABASE_URL) {
+  throw new Error("ERROR CRÍTICO: La variable VITE_SUPABASE_URL no está llegando al build.");
+}
