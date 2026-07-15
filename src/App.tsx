@@ -30,7 +30,7 @@ export default function App() {
     return savedClient ? JSON.parse(savedClient) : null;
   });
 
-  // Fetch initial users from Supabase on mount
+  // Fetch initial users from Supabase and subscribe to Realtime channel
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -47,7 +47,57 @@ export default function App() {
         console.error("Error al cargar usuarios de Supabase:", err);
       }
     };
+
     fetchUsers();
+
+    // Subscribe to real-time changes on the 'users' table
+    const channel = supabase
+      .channel('users-realtime-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // listen to INSERT, UPDATE, and DELETE events
+          schema: 'public',
+          table: 'users',
+        },
+        (payload) => {
+          console.log('Cambio detectado en Supabase Realtime:', payload);
+          
+          if (payload.eventType === 'INSERT') {
+            const newUser = mapRowToUser(payload.new);
+            setUsers((prev) => {
+              // Avoid adding duplicates if already present
+              if (prev.some((u) => u.id === newUser.id)) return prev;
+              return [newUser, ...prev];
+            });
+          } else if (payload.eventType === 'UPDATE') {
+            const updatedUser = mapRowToUser(payload.new);
+            setUsers((prev) => prev.map((u) => (u.id === updatedUser.id ? updatedUser : u)));
+            
+            // If the logged-in client profile is updated, sync their session
+            setLoggedInClient((current) => {
+              if (current && current.id === updatedUser.id) {
+                return updatedUser;
+              }
+              return current;
+            });
+          } else if (payload.eventType === 'DELETE') {
+            const deletedId = payload.old.id;
+            setUsers((prev) => prev.filter((u) => u.id !== deletedId));
+            
+            // Log out user if they get deleted from Supabase
+            setLoggedInClient((current) => {
+              if (current && current.id === deletedId) return null;
+              return current;
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   // Sync client profile state with LocalStorage
@@ -69,9 +119,12 @@ export default function App() {
     }
   };
 
-  // Add user locally and keep state synced
+  // Keep state updated locally for fast feedback
   const handleAddUser = (newUser: RegisteredUser) => {
-    setUsers((prev) => [newUser, ...prev]);
+    setUsers((prev) => {
+      if (prev.some((u) => u.id === newUser.id)) return prev;
+      return [newUser, ...prev];
+    });
   };
 
   // Delete user from Supabase and update state
