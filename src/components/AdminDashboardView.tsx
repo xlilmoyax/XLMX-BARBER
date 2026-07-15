@@ -7,8 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { Screen, RegisteredUser } from '../types';
 import { 
-  Users, UserCheck, ShieldAlert, Trash2, Search, PlusCircle, 
-  Download, LogOut, Check, Sparkles, RefreshCw, Pencil, Layers, Calendar
+  Users, LogOut, Search, Trash2 
 } from 'lucide-react';
 
 interface Props {
@@ -17,98 +16,84 @@ interface Props {
 }
 
 export default function AdminDashboardView({ onLogout, onNavigate }: Props) {
-  // 1. ESTADOS LOCALES
   const [users, setUsers] = useState<RegisteredUser[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [tierFilter, setTierFilter] = useState<string>('all');
-  const [showAddForm, setShowAddForm] = useState(false);
 
-  // 2. FUNCIÓN PARA BUSCAR DATOS (definida dentro del componente)
   const fetchUsers = async () => {
     const { data, error } = await supabase.from('users').select('*');
-    if (error) {
-      console.error("Error al cargar:", error);
-    } else {
-      setUsers(data as RegisteredUser[] || []);
-    }
+    if (error) console.error("Error al cargar:", error);
+    else setUsers(data as RegisteredUser[] || []);
   };
 
-  // 3. CARGA INICIAL
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  // 4. MANEJADORES DE ACCIONES (Lógica de Supabase)
   const handleDelete = async (id: string) => {
+    if (!confirm("¿Eliminar este usuario?")) return;
     const { error } = await supabase.from('users').delete().eq('id', id);
-    if (!error) {
-      fetchUsers(); // Actualiza la lista tras borrar
-    } else {
-      alert("Error al borrar: " + error.message);
-    }
+    if (!error) fetchUsers();
+    else alert("Error: " + error.message);
   };
 
-  // A partir de aquí, continúa con tu JSX original (el return...)
-return (
-  <div className="p-8 bg-black min-h-screen text-white">
-    {/* HEADER DEL PANEL */}
-    <div className="flex justify-between items-center mb-8">
-      <div>
-        <h1 className="text-3xl font-bold">Barbería XLMX Córdoba</h1>
-        <p className="text-red-500 font-semibold mt-2">ACCESO AUTORIZADO · PANEL ADMINISTRATIVO</p>
-      </div>
-      <button onClick={onLogout} className="bg-white text-black px-4 py-2 rounded hover:bg-gray-200">
-        SALIR DEL PANEL
-      </button>
-    </div>
+  const filteredUsers = users.filter(u => 
+    u.fullname?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    u.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-    {/* TARJETAS DE RESUMEN (Stats) */}
-    <div className="grid grid-cols-4 gap-4 mb-8">
-      <div className="bg-gray-900 p-4 rounded border border-gray-700">
-        <p className="text-gray-400">CLIENTES REGISTRADOS</p>
-        <h2 className="text-4xl font-bold">{users.length}</h2>
-      </div>
-      {/* Puedes agregar más tarjetas aquí siguiendo el mismo patrón */}
-    </div>
-
-    {/* BUSCADOR */}
-    <div className="flex gap-4 mb-6">
-      <input 
-        className="flex-1 bg-gray-900 border border-gray-700 p-3 rounded text-white"
-        placeholder="Buscar cliente por nombre o correo electrónico..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
-      <button className="bg-yellow-500 text-black px-6 py-2 font-bold rounded">AGREGAR CLIENTE</button>
-    </div>
-
-    {/* TABLA DE USUARIOS */}
-    <div className="bg-gray-900 p-6 rounded border border-gray-700">
-      <h3 className="text-xl mb-4">LISTADO DE COBERTURAS REGISTRADAS</h3>
-      {users.length > 0 ? (
-        <div className="space-y-4">
-          {users.filter(u => u.fullname?.toLowerCase().includes(searchTerm.toLowerCase())).map(user => (
-            <div key={user.id} className="flex justify-between items-center border-b border-gray-800 pb-4">
-              <div>
-                <p className="font-bold">{user.fullname}</p>
-                <p className="text-sm text-gray-400">{user.email} · {user.phone}</p>
-              </div>
-              <div className="flex gap-2">
-                <button className="text-blue-400 hover:text-blue-300">Editar</button>
-                <button 
-                  onClick={() => handleDelete(user.id)} 
-                  className="text-red-500 hover:text-red-400"
-                >
-                  Borrar
-                </button>
-              </div>
-            </div>
-          ))}
+  return (
+    <div className="py-8 px-4 max-w-7xl mx-auto space-y-8 bg-zinc-950 min-h-screen text-white">
+      {/* Header */}
+      <div className="flex justify-between items-center border-b border-zinc-800 pb-6">
+        <div>
+          <h1 className="text-3xl font-bold">Barbería XLMX Córdoba</h1>
+          <p className="text-zinc-500 text-sm">Panel Administrativo</p>
         </div>
-      ) : (
-        <p className="text-center py-10 text-gray-500">No hay clientes registrados.</p>
-      )}
+        <button onClick={onLogout} className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 px-4 py-2 rounded text-zinc-300 hover:text-red-400">
+          <LogOut className="w-4 h-4" /> SALIR
+        </button>
+      </div>
+
+      {/* Buscador */}
+      <div className="relative">
+        <Search className="absolute left-3 top-3 w-4 h-4 text-zinc-500" />
+        <input 
+          type="text" 
+          placeholder="Buscar cliente..." 
+          className="w-full bg-zinc-900 border border-zinc-800 rounded pl-10 p-2 text-white"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+
+      {/* Tabla - AQUÍ ESTABA EL ERROR DE SINTAXIS */}
+      <div className="bg-zinc-900 rounded border border-zinc-800 overflow-hidden">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-zinc-950 text-zinc-400 uppercase text-xs">
+            <tr>
+              <th className="p-4">Nombre</th>
+              <th className="p-4">Contacto</th>
+              <th className="p-4 text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredUsers.map((user) => (
+              <tr key={user.id} className="border-t border-zinc-800 hover:bg-zinc-800/50">
+                <td className="p-4">{user.fullname}</td>
+                <td className="p-4">{user.email}</td>
+                <td className="p-4 text-center">
+                  <button 
+                    onClick={() => handleDelete(user.id)} 
+                    className="text-red-400 hover:text-red-300 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
-);
+  );
 }
