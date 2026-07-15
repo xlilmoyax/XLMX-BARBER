@@ -50,22 +50,23 @@ export default function AdminDashboardView({ onLogout, onNavigate }: Props) {
 
   // A partir de aquí, continúa con tu JSX original (el return...)
 return (
-  <div>
-    {/* ... resto de tu código ... */}
+  <div style={{ padding: '20px', color: 'white' }}>
+    <h1>Panel de Administración</h1>
+    <p>Total de usuarios cargados: {users ? users.length : 'Cargando...'}</p>
     
-    {/* REEMPLAZA TU BLOQUE DE FILTRO POR ESTE: */}
     {users && users.length > 0 ? (
-      users
-        .filter(user => true)
-        .map(user => (
-          <div key={user.id}>
-             {/* Aquí va tu tarjeta de usuario */}
-             <button onClick={() => handleDelete(user.id)}>Borrar</button>
-          </div>
-        ))
+      <ul>
+        {users.map((user: any) => (
+          <li key={user.id} style={{ marginBottom: '10px' }}>
+            {/* Imprimimos el objeto completo para ver qué campos tiene */}
+            {JSON.stringify(user)} 
+            <button onClick={() => handleDelete(user.id)}>Borrar</button>
+          </li>
+        ))}
+      </ul>
     ) : (
-      <p>Cargando usuarios o no hay datos disponibles...</p>
+      <p>No hay datos en la base de datos o siguen cargando.</p>
     )}
   </div>
 );
-};
+}
