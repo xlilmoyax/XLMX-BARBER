@@ -50,29 +50,47 @@ export default function AdminDashboardView({ onLogout, onNavigate }: Props) {
 
   // A partir de aquí, continúa con tu JSX original (el return...)
 return (
-  <div className="p-6 text-white">
-    <h1 className="text-2xl font-bold mb-6">Panel de Administración</h1>
-    
-    {users && users.length > 0 ? (
-      <div className="grid gap-4">
-        {users.map((user) => (
-          <div key={user.id} className="bg-gray-800 p-4 rounded-lg flex justify-between items-center">
-            <div>
-              <h2 className="text-lg font-semibold">{user.fullname}</h2>
-              <p className="text-sm text-gray-400">{user.email} | {user.phone}</p>
+  <div className="admin-dashboard-container">
+    <div className="header-actions">
+      <h1 className="text-2xl font-bold">Panel de Administración</h1>
+      <button onClick={onLogout} className="logout-btn">Salir</button>
+    </div>
+
+    {/* Tu buscador original */}
+    <div className="search-bar">
+      <Search size={20} />
+      <input 
+        type="text" 
+        placeholder="Buscar usuarios..." 
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+    </div>
+
+    {/* Listado de Usuarios */}
+    <div className="users-list">
+      {users && users.length > 0 ? (
+        users
+          .filter(u => u.fullname?.toLowerCase().includes(searchTerm.toLowerCase()))
+          .map((user) => (
+            <div key={user.id} className="user-card">
+              <div className="user-info">
+                <h3>{user.fullname}</h3>
+                <p>{user.email}</p>
+                <span className="badge">{user.membership}</span>
+              </div>
+              <button 
+                onClick={() => handleDelete(user.id)}
+                className="delete-btn"
+              >
+                <Trash2 size={18} />
+              </button>
             </div>
-            <button 
-              onClick={() => handleDelete(user.id)}
-              className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white"
-            >
-              Borrar
-            </button>
-          </div>
-        ))}
-      </div>
-    ) : (
-      <p>No hay usuarios registrados.</p>
-    )}
+          ))
+      ) : (
+        <p>No se encontraron resultados.</p>
+      )}
+    </div>
   </div>
 );
 }
