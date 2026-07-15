@@ -50,22 +50,28 @@ export default function AdminDashboardView({ onLogout, onNavigate }: Props) {
 
   // A partir de aquí, continúa con tu JSX original (el return...)
 return (
-  <div style={{ padding: '20px', color: 'white' }}>
-    <h1>Panel de Administración</h1>
-    <p>Total de usuarios cargados: {users ? users.length : 'Cargando...'}</p>
+  <div className="p-6 text-white">
+    <h1 className="text-2xl font-bold mb-6">Panel de Administración</h1>
     
     {users && users.length > 0 ? (
-      <ul>
-        {users.map((user: any) => (
-          <li key={user.id} style={{ marginBottom: '10px' }}>
-            {/* Imprimimos el objeto completo para ver qué campos tiene */}
-            {JSON.stringify(user)} 
-            <button onClick={() => handleDelete(user.id)}>Borrar</button>
-          </li>
+      <div className="grid gap-4">
+        {users.map((user) => (
+          <div key={user.id} className="bg-gray-800 p-4 rounded-lg flex justify-between items-center">
+            <div>
+              <h2 className="text-lg font-semibold">{user.fullname}</h2>
+              <p className="text-sm text-gray-400">{user.email} | {user.phone}</p>
+            </div>
+            <button 
+              onClick={() => handleDelete(user.id)}
+              className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white"
+            >
+              Borrar
+            </button>
+          </div>
         ))}
-      </ul>
+      </div>
     ) : (
-      <p>No hay datos en la base de datos o siguen cargando.</p>
+      <p>No hay usuarios registrados.</p>
     )}
   </div>
 );
