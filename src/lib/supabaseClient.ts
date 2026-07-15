@@ -1,13 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 
-// src/lib/supabaseClient.ts
-
-// CAMBIA ESTO SOLO PARA PROBAR:
-const supabaseUrl = "https://wqzhdtsnsryfmtkyqtkd.supabase.co/rest/v1/";
+// Valores fijos para asegurar que la aplicación cargue
+const supabaseUrl = "https://wqzhdtsnsryfmtkyqtkd.supabase.co";
 const supabaseKey = "sb_publishable_q4zdKdBOavu9Yy1hgazjuw_snWYGHq0";
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+console.log("Inicializando Supabase con:", supabaseUrl);
 
-if (!import.meta.env.VITE_SUPABASE_URL) {
-  throw new Error("ERROR CRÍTICO: La variable VITE_SUPABASE_URL no está llegando al build.");
+if (!supabaseUrl || !supabaseKey) {
+  console.error("Faltan las credenciales de Supabase");
 }
+
+export const supabase = createClient(supabaseUrl, supabaseKey);
