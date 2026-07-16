@@ -24,6 +24,6 @@ export interface RegisteredUser {
   email: string;
   phone: string;
   isSocio: boolean;
-  membership: 'gold' | 'plata' | 'bronce';
+  membership: 'gold' | 'plata' | 'bronce' | 'ninguno';
   createdAt: string;
 }

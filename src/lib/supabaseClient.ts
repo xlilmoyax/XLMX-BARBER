@@ -17,7 +17,7 @@ export function mapRowToUser(row: any): RegisteredUser {
     email: row.email || '',
     phone: row.phone || '',
     isSocio: row.is_socio ?? false,
-    membership: row.membership || 'bronce',
+    membership: row.membership || 'ninguno',
     createdAt: row.created_at || row.createdAt || new Date().toISOString(),
   };
 }

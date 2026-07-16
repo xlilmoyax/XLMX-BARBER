@@ -38,7 +38,7 @@ export default function AdminLoginView({
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [isSocio, setIsSocio] = useState<boolean>(false);
-  const [membership, setMembership] = useState<'bronce' | 'plata' | 'gold'>('bronce');
+  const [membership, setMembership] = useState<'bronce' | 'plata' | 'gold' | 'ninguno'>('ninguno');
   const [associateSync, setAssociateSync] = useState<boolean>(true);
 
   // Admin login states
@@ -158,7 +158,7 @@ export default function AdminLoginView({
         email: sanitizedEmail,
         phone: sanitizedPhone,
         isSocio,
-        membership: isSocio ? membership : 'bronce',
+        membership: isSocio ? (membership === 'ninguno' ? 'bronce' : membership) : 'ninguno',
         createdAt: new Date().toISOString(),
       };
 
@@ -195,7 +195,7 @@ export default function AdminLoginView({
       setPhone('');
       setAge(25);
       setIsSocio(false);
-      setMembership('bronce');
+      setMembership('ninguno');
 
       setTimeout(() => {
         setSuccessMsg(null);
@@ -622,7 +622,7 @@ export default function AdminLoginView({
                         type="button"
                         onClick={() => {
                           setIsSocio(!isSocio);
-                          setMembership('bronce');
+                          setMembership(!isSocio ? 'bronce' : 'ninguno');
                         }}
                         className={`px-3 py-1 rounded text-[9px] font-bold uppercase tracking-wider cursor-pointer transition-all ${
                           isSocio ? 'bg-amber-400 text-zinc-950' : 'bg-zinc-800 text-zinc-400'
