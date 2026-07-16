@@ -5,14 +5,13 @@
 
 import React, { useState } from 'react';
 import { Screen, RegisteredUser } from '../types';
-import { supabase } from '../lib/supabaseClient';
-import { sanitizeInput, validateEmail, validatePhone } from '../lib/security';
-import { CornerUpLeft, User, Mail, Phone, Calendar, CheckCircle2 } from 'lucide-react';
+import { CornerUpLeft, User, Mail, Phone, Calendar, BadgePercent, CheckCircle2, ShieldAlert } from 'lucide-react';
 
 interface RegistroViewProps {
   onNavigate: (screen: Screen) => void;
   onAddUser: (user: RegisteredUser) => void;
   isSection?: boolean;
+  // Cambiamos a 'RegisteredUser | null' para que coincida con App.tsx
   setLoggedInClient?: (user: RegisteredUser | null) => void; 
 }
 
@@ -25,112 +24,51 @@ export default function RegistroView({ onNavigate, onAddUser, isSection = false,
   const [membership, setMembership] = useState<'bronce' | 'plata' | 'gold' | 'ninguno'>('ninguno');
   const [associateSync, setAssociateSync] = useState<boolean>(true);
   
-  // States for notifications
+  // Registration success warning state
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Sanitizing inputs
-    const sanitizedName = sanitizeInput(fullname).trim();
-    const sanitizedEmail = sanitizeInput(email).trim().toLowerCase();
-    const sanitizedPhone = sanitizeInput(phone).trim();
-
-    if (!sanitizedName || !sanitizedEmail || !sanitizedPhone) {
+    if (!fullname.trim() || !email.trim() || !phone.trim()) {
       alert('Por favor complete todos los campos obligatorios del perfil.');
       return;
     }
 
-    if (!validateEmail(sanitizedEmail)) {
-      setErrorMsg('Por favor introduce un formato de correo electrónico válido.');
-      return;
+    const newUser: RegisteredUser = {
+      id: 'usr_' + Date.now().toString(36),
+      fullname,
+      age,
+      email,
+      phone,
+      isSocio,
+      membership: isSocio ? membership : 'ninguno',
+      createdAt: new Date().toISOString(),
+    };
+
+    onAddUser(newUser);
+    if (setLoggedInClient) {
+      setLoggedInClient(newUser);
     }
 
-    if (!validatePhone(sanitizedPhone)) {
-      setErrorMsg('El número de WhatsApp contiene caracteres no permitidos.');
-      return;
+    // Set success notification message
+    let alertText = `¡Registro Exitoso para ${fullname}!`;
+    if (associateSync) {
+      alertText += ' Vinculado con éxito para alertas sincronizadas con matymoya4@gmail.com.';
     }
+    setSuccessMsg(alertText);
 
-    setLoading(true);
-    setErrorMsg(null);
+    // Reset fields
+    setFullname('');
+    setEmail('');
+    setPhone('');
+    setIsSocio(false);
+    setMembership('ninguno');
 
-    try {
-      // Check duplicate email in Supabase
-      const { data: existingUser, error: checkError } = await supabase
-        .from('users')
-        .select('id')
-        .eq('email', sanitizedEmail)
-        .maybeSingle();
-
-      if (checkError) throw checkError;
-
-      if (existingUser) {
-        setErrorMsg('Este correo electrónico ya tiene un perfil activo. Intente iniciar sesión en la sección de login.');
-        setLoading(false);
-        return;
-      }
-
-      const newUser: RegisteredUser = {
-        id: 'usr_' + Date.now().toString(36),
-        fullname: sanitizedName,
-        age,
-        email: sanitizedEmail,
-        phone: sanitizedPhone,
-        isSocio,
-        membership: isSocio ? (membership === 'ninguno' ? 'bronce' : membership) : 'ninguno',
-        createdAt: new Date().toISOString(),
-      };
-
-      // Save to Supabase
-      const { error: insertError } = await supabase
-        .from('users')
-        .insert([
-          {
-            id: newUser.id,
-            fullname: newUser.fullname,
-            email: newUser.email,
-            phone: newUser.phone,
-            age: newUser.age,
-            is_socio: newUser.isSocio,
-            membership: newUser.membership,
-            created_at: newUser.createdAt
-          }
-        ]);
-
-      if (insertError) throw insertError;
-
-      onAddUser(newUser);
-      if (setLoggedInClient) {
-        setLoggedInClient(newUser);
-      }
-
-      // Set success notification message
-      let alertText = `¡Registro Exitoso para ${sanitizedName}!`;
-      if (associateSync) {
-        alertText += ' Vinculado con éxito para alertas sincronizadas con matymoya4@gmail.com.';
-      }
-      setSuccessMsg(alertText);
-
-      // Reset fields
-      setFullname('');
-      setEmail('');
-      setPhone('');
-      setAge(25);
-      setIsSocio(false);
-      setMembership('ninguno');
-
-      // Auto dismiss after 5 seconds
-      setTimeout(() => {
-        setSuccessMsg(null);
-      }, 5000);
-    } catch (err: any) {
-      console.error(err);
-      setErrorMsg('Error al conectar y guardar el perfil: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
+    // Auto dismiss after 5 seconds
+    setTimeout(() => {
+      setSuccessMsg(null);
+    }, 5000);
   };
 
   return (
@@ -181,18 +119,10 @@ export default function RegistroView({ onNavigate, onAddUser, isSection = false,
           </div>
         )}
 
-        {/* Error Notification */}
-        {errorMsg && (
-          <div className="bg-red-950/40 border border-red-500/30 p-4 rounded-lg text-red-200 text-xs leading-relaxed animate-fadeIn">
-            <p className="font-semibold">Ocurrió un inconveniente:</p>
-            <p className="mt-1">{errorMsg}</p>
-          </div>
-        )}
-
         <form id="client-registration-form" onSubmit={handleSubmit} className="space-y-5">
           
           {/* Form input: Name */}
-          <div className="space-y-1.5">
+          <div className="space-y-1.5Packed">
             <label className="block text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">
               Nombre y Apellido Completo *
             </label>
@@ -205,9 +135,8 @@ export default function RegistroView({ onNavigate, onAddUser, isSection = false,
                 value={fullname}
                 onChange={(e) => setFullname(e.target.value)}
                 placeholder=""
-                className="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-3 pl-10 text-xs text-white focus:outline-none focus:border-amber-400/80 transition-colors border-zinc-800"
+                className="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-3 pl-10 text-xs text-white focus:outline-none focus:border-amber-400/80 transition-colors"
                 maxLength={60}
-                disabled={loading}
               />
             </div>
           </div>
@@ -230,8 +159,7 @@ export default function RegistroView({ onNavigate, onAddUser, isSection = false,
                   required
                   value={age}
                   onChange={(e) => setAge(parseInt(e.target.value) || 25)}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-3 pl-10 text-xs text-white focus:outline-none focus:border-amber-400/80 transition-colors border-zinc-800"
-                  disabled={loading}
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-3 pl-10 text-xs text-white focus:outline-none focus:border-amber-400/80 transition-colors"
                 />
               </div>
             </div>
@@ -249,8 +177,7 @@ export default function RegistroView({ onNavigate, onAddUser, isSection = false,
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder=""
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-3 pl-10 text-xs text-white focus:outline-none focus:border-amber-400/80 transition-colors border-zinc-800"
-                  disabled={loading}
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-3 pl-10 text-xs text-white focus:outline-none focus:border-amber-400/80 transition-colors"
                 />
               </div>
             </div>
@@ -271,14 +198,13 @@ export default function RegistroView({ onNavigate, onAddUser, isSection = false,
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder=""
-                className="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-3 pl-10 text-xs text-white focus:outline-none focus:border-amber-400/80 transition-colors border-zinc-800"
-                disabled={loading}
+                className="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-3 pl-10 text-xs text-white focus:outline-none focus:border-amber-400/80 transition-colors"
               />
             </div>
           </div>
 
           {/* Exclusive Sync warning alignment */}
-          <div className="p-4 rounded bg-zinc-950 border border-zinc-850">
+          <div className="p-4 rounded bg-zinc-950 border border-zinc-850 space-y-3">
             <div className="flex items-start gap-2.5">
               <input
                 id="reg-checkbox-sync"
@@ -286,7 +212,6 @@ export default function RegistroView({ onNavigate, onAddUser, isSection = false,
                 checked={associateSync}
                 onChange={(e) => setAssociateSync(e.target.checked)}
                 className="mt-1 w-4 h-4 text-amber-400 accent-amber-400 border-zinc-850 rounded focus:ring-0 cursor-pointer"
-                disabled={loading}
               />
               <div>
                 <label htmlFor="reg-checkbox-sync" className="text-zinc-200 text-xs font-semibold cursor-pointer select-none block">
@@ -319,7 +244,6 @@ export default function RegistroView({ onNavigate, onAddUser, isSection = false,
                     ? 'bg-amber-400 text-zinc-950'
                     : 'bg-zinc-800 text-zinc-400'
                 }`}
-                disabled={loading}
               >
                 {isSocio ? 'Sí, soy Socio' : 'No en este momento'}
               </button>
@@ -340,7 +264,6 @@ export default function RegistroView({ onNavigate, onAddUser, isSection = false,
                           ? 'bg-amber-400/10 text-amber-300 border-amber-400'
                           : 'bg-zinc-900 text-zinc-500 border-transparent hover:text-zinc-300 hover:bg-zinc-850'
                       }`}
-                      disabled={loading}
                     >
                       {tier}
                     </button>
@@ -354,10 +277,9 @@ export default function RegistroView({ onNavigate, onAddUser, isSection = false,
           <button
             id="reg-btn-submit"
             type="submit"
-            className="w-full py-4 rounded bg-amber-400 hover:bg-amber-305 text-zinc-950 font-bold uppercase tracking-widest text-xs transition-colors duration-300 cursor-pointer disabled:opacity-50"
-            disabled={loading}
+            className="w-full py-4 rounded bg-amber-400 hover:bg-amber-305 text-zinc-950 font-bold uppercase tracking-widest text-xs transition-colors duration-300 cursor-pointer"
           >
-            {loading ? 'Procesando registro...' : 'Registrar Perfil Completo'}
+            Registrar Perfil Completo
           </button>
 
         </form>
