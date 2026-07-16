@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import { Screen, RegisteredUser } from '../types';
 import { supabase } from '../lib/supabaseClient';
+import { sanitizeInput, validateEmail, validatePhone } from '../lib/security';
 import { CornerUpLeft, User, Mail, Phone, Calendar, CheckCircle2 } from 'lucide-react';
 
 interface RegistroViewProps {
@@ -32,8 +33,23 @@ export default function RegistroView({ onNavigate, onAddUser, isSection = false,
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!fullname.trim() || !email.trim() || !phone.trim()) {
+    // Sanitizing inputs
+    const sanitizedName = sanitizeInput(fullname).trim();
+    const sanitizedEmail = sanitizeInput(email).trim().toLowerCase();
+    const sanitizedPhone = sanitizeInput(phone).trim();
+
+    if (!sanitizedName || !sanitizedEmail || !sanitizedPhone) {
       alert('Por favor complete todos los campos obligatorios del perfil.');
+      return;
+    }
+
+    if (!validateEmail(sanitizedEmail)) {
+      setErrorMsg('Por favor introduce un formato de correo electrónico válido.');
+      return;
+    }
+
+    if (!validatePhone(sanitizedPhone)) {
+      setErrorMsg('El número de WhatsApp contiene caracteres no permitidos.');
       return;
     }
 
@@ -41,11 +57,11 @@ export default function RegistroView({ onNavigate, onAddUser, isSection = false,
     setErrorMsg(null);
 
     try {
-      // Check duplicate email
+      // Check duplicate email in Supabase
       const { data: existingUser, error: checkError } = await supabase
         .from('users')
         .select('id')
-        .eq('email', email.trim().toLowerCase())
+        .eq('email', sanitizedEmail)
         .maybeSingle();
 
       if (checkError) throw checkError;
@@ -58,10 +74,10 @@ export default function RegistroView({ onNavigate, onAddUser, isSection = false,
 
       const newUser: RegisteredUser = {
         id: 'usr_' + Date.now().toString(36),
-        fullname,
+        fullname: sanitizedName,
         age,
-        email: email.trim().toLowerCase(),
-        phone,
+        email: sanitizedEmail,
+        phone: sanitizedPhone,
         isSocio,
         membership: isSocio ? (membership === 'ninguno' ? 'bronce' : membership) : 'ninguno',
         createdAt: new Date().toISOString(),
@@ -91,7 +107,7 @@ export default function RegistroView({ onNavigate, onAddUser, isSection = false,
       }
 
       // Set success notification message
-      let alertText = `¡Registro Exitoso para ${fullname}!`;
+      let alertText = `¡Registro Exitoso para ${sanitizedName}!`;
       if (associateSync) {
         alertText += ' Vinculado con éxito para alertas sincronizadas con matymoya4@gmail.com.';
       }

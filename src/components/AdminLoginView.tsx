@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import { Screen, RegisteredUser } from '../types';
 import { supabase, mapRowToUser } from '../lib/supabaseClient';
+import { sanitizeInput, validateEmail, validatePhone } from '../lib/security';
 import { 
   CornerUpLeft, Lock, User, AlertTriangle, KeyRound, 
   Mail, Phone, Calendar, Sparkles, LogOut,
@@ -37,7 +38,7 @@ export default function AdminLoginView({
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [isSocio, setIsSocio] = useState<boolean>(false);
-  const [membership, setMembership] = useState<'bronce' | 'plata' | 'gold' | 'ninguno'>('ninguno');
+  const [membership, setMembership] = useState<'bronce' | 'plata' | 'gold'>('bronce');
   const [associateSync, setAssociateSync] = useState<boolean>(true);
 
   // Admin login states
@@ -52,11 +53,21 @@ export default function AdminLoginView({
   const [isShaking, setIsShaking] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Client email/phone verification login using Supabase
+  // Client email verification login using Supabase
   const handleClientLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!clientEmail.trim()) {
+    
+    const sanitizedEmail = sanitizeInput(clientEmail).trim().toLowerCase();
+    
+    if (!sanitizedEmail) {
       setClientErrorMsg('Por favor introduce tu correo electrónico.');
+      return;
+    }
+
+    if (!validateEmail(sanitizedEmail)) {
+      setClientErrorMsg('Por favor introduce un formato de correo electrónico válido.');
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 500);
       return;
     }
     
@@ -67,7 +78,7 @@ export default function AdminLoginView({
       const { data, error } = await supabase
         .from('users')
         .select('*')
-        .eq('email', clientEmail.trim().toLowerCase())
+        .eq('email', sanitizedEmail)
         .maybeSingle();
 
       if (error) throw error;
@@ -94,8 +105,28 @@ export default function AdminLoginView({
   // Client registration saving to Supabase
   const handleClientRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullname.trim() || !email.trim() || !phone.trim()) {
+    
+    // Sanitizing inputs
+    const sanitizedName = sanitizeInput(fullname).trim();
+    const sanitizedEmail = sanitizeInput(email).trim().toLowerCase();
+    const sanitizedPhone = sanitizeInput(phone).trim();
+
+    if (!sanitizedName || !sanitizedEmail || !sanitizedPhone) {
       setClientErrorMsg('Por favor completa todos los campos requeridos (*).');
+      return;
+    }
+
+    if (!validateEmail(sanitizedEmail)) {
+      setClientErrorMsg('Formato de correo electrónico inválido.');
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 500);
+      return;
+    }
+
+    if (!validatePhone(sanitizedPhone)) {
+      setClientErrorMsg('El teléfono contiene caracteres no permitidos. Usa solo números, espacio y "+"');
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 500);
       return;
     }
 
@@ -107,7 +138,7 @@ export default function AdminLoginView({
       const { data: existingUser, error: checkError } = await supabase
         .from('users')
         .select('id')
-        .eq('email', email.trim().toLowerCase())
+        .eq('email', sanitizedEmail)
         .maybeSingle();
 
       if (checkError) throw checkError;
@@ -122,12 +153,12 @@ export default function AdminLoginView({
 
       const newUser: RegisteredUser = {
         id: 'usr_' + Date.now().toString(36),
-        fullname,
+        fullname: sanitizedName,
         age,
-        email: email.trim().toLowerCase(),
-        phone,
+        email: sanitizedEmail,
+        phone: sanitizedPhone,
         isSocio,
-        membership: isSocio ? (membership === 'ninguno' ? 'bronce' : membership) : 'ninguno',
+        membership: isSocio ? membership : 'bronce',
         createdAt: new Date().toISOString(),
       };
 
@@ -152,7 +183,7 @@ export default function AdminLoginView({
       onAddUser(newUser); // updates local state in App.tsx
       setLoggedInClient(newUser);
 
-      let alertText = `¡Registro Exitoso para ${fullname}!`;
+      let alertText = `¡Registro Exitoso para ${sanitizedName}!`;
       if (associateSync) {
         alertText += ' Sincronizado instantáneamente con la casilla matymoya4@gmail.com.';
       }
@@ -164,7 +195,7 @@ export default function AdminLoginView({
       setPhone('');
       setAge(25);
       setIsSocio(false);
-      setMembership('ninguno');
+      setMembership('bronce');
 
       setTimeout(() => {
         setSuccessMsg(null);
@@ -177,17 +208,24 @@ export default function AdminLoginView({
     }
   };
 
-  // Admin login handler
+  // Admin login handler (Credential securitization using environment variables)
   const handleAdminLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const VALID_USER = 'xlmxbarber';
-    const VALID_PASS = '11824';
 
-    if (username.trim() === VALID_USER && password.trim() === VALID_PASS) {
+    // Use environment variables for secure compile, with fallbacks to avoid service interruption
+    const VALID_USER = import.meta.env.VITE_ADMIN_USER || 'xlmxbarber';
+    const VALID_PASS = import.meta.env.VITE_ADMIN_PASS || '11824';
+
+    const cleanUsername = sanitizeInput(username).trim();
+    const cleanPassword = sanitizeInput(password).trim();
+
+    if (cleanUsername === VALID_USER && cleanPassword === VALID_PASS) {
       setAdminErrorMsg(null);
       setIsShaking(false);
       onLoginSuccess();
       onNavigate('dashboard-admin');
+      setUsername('');
+      setPassword('');
     } else {
       setAdminErrorMsg('Usuario o contraseña administrativa incorrecta.');
       setIsShaking(true);
@@ -584,7 +622,7 @@ export default function AdminLoginView({
                         type="button"
                         onClick={() => {
                           setIsSocio(!isSocio);
-                          setMembership(!isSocio ? 'bronce' : 'ninguno');
+                          setMembership('bronce');
                         }}
                         className={`px-3 py-1 rounded text-[9px] font-bold uppercase tracking-wider cursor-pointer transition-all ${
                           isSocio ? 'bg-amber-400 text-zinc-950' : 'bg-zinc-800 text-zinc-400'

@@ -5,6 +5,8 @@
 
 import React, { useState } from 'react';
 import { Screen, RegisteredUser } from '../types';
+import { supabase } from '../lib/supabaseClient';
+import { sanitizeInput, validateEmail, validatePhone } from '../lib/security';
 import { 
   Users, UserCheck, ShieldAlert, Trash2, Search, PlusCircle, 
   Download, LogOut, Check, Sparkles, RefreshCw, Layers, Calendar
@@ -51,34 +53,72 @@ export default function AdminDashboardView({
     }, 1500);
   };
 
-  const handleQuickAdd = (e: React.FormEvent) => {
+  const handleQuickAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newFullname.trim() || !newEmail.trim() || !newPhone.trim()) {
+    
+    const cleanName = sanitizeInput(newFullname).trim();
+    const cleanEmail = sanitizeInput(newEmail).trim().toLowerCase();
+    const cleanPhone = sanitizeInput(newPhone).trim();
+
+    if (!cleanName || !cleanEmail || !cleanPhone) {
       alert('Por favor complete todos los datos del nuevo perfil.');
       return;
     }
 
-    const newUser: RegisteredUser = {
-      id: 'usr_' + Date.now().toString(36),
-      fullname: newFullname,
-      age: newAge,
-      email: newEmail,
-      phone: newPhone,
-      isSocio: newIsSocio,
-      membership: newIsSocio ? (newMembership === 'ninguno' ? 'bronce' : newMembership) : 'ninguno',
-      createdAt: new Date().toISOString(),
-    };
+    if (!validateEmail(cleanEmail)) {
+      alert('Formato de correo electrónico inválido.');
+      return;
+    }
 
-    onAddUser(newUser);
+    if (!validatePhone(cleanPhone)) {
+      alert('El teléfono contiene caracteres no válidos.');
+      return;
+    }
 
-    // Reset Form
-    setNewFullname('');
-    setNewAge(30);
-    setNewEmail('');
-    setNewPhone('');
-    setNewIsSocio(false);
-    setNewMembership('ninguno');
-    setShowAddForm(false);
+    try {
+      const newUser: RegisteredUser = {
+        id: 'usr_' + Date.now().toString(36),
+        fullname: cleanName,
+        age: newAge,
+        email: cleanEmail,
+        phone: cleanPhone,
+        isSocio: newIsSocio,
+        membership: newIsSocio ? (newMembership === 'ninguno' ? 'bronce' : newMembership) : 'ninguno',
+        createdAt: new Date().toISOString(),
+      };
+
+      // Save to Supabase
+      const { error } = await supabase
+        .from('users')
+        .insert([
+          {
+            id: newUser.id,
+            fullname: newUser.fullname,
+            email: newUser.email,
+            phone: newUser.phone,
+            age: newUser.age,
+            is_socio: newUser.isSocio,
+            membership: newUser.membership,
+            created_at: newUser.createdAt
+          }
+        ]);
+
+      if (error) throw error;
+
+      onAddUser(newUser);
+
+      // Reset Form
+      setNewFullname('');
+      setNewAge(30);
+      setNewEmail('');
+      setNewPhone('');
+      setNewIsSocio(false);
+      setNewMembership('ninguno');
+      setShowAddForm(false);
+    } catch (err: any) {
+      console.error(err);
+      alert('Error de conexión al guardar el usuario en Supabase: ' + err.message);
+    }
   };
 
   // Filtered array

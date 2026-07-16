@@ -16,13 +16,14 @@ export type Screen =
   | 'dashboard-admin'
   | 'legal';
 
+// En tu archivo src/types.ts
 export interface RegisteredUser {
   id: string;
   fullname: string;
   age: number;
   email: string;
   phone: string;
-  isSocio: boolean; // Yes/No
-  membership: 'bronce' | 'plata' | 'gold' | 'ninguno';
+  isSocio: boolean;
+  membership: 'gold' | 'plata' | 'bronce';
   createdAt: string;
 }
