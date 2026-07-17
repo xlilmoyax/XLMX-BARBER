@@ -22,7 +22,7 @@ type AdminDashboardTypedProps = {
   onLogout: () => void;
   onNavigate: (screen: Screen) => void;
   onDeleteUser: (userId: string) => void;
-  onAddUser: (user: RegisteredUser) => void;
+  onAddUser: (user: RegisteredUser) => Promise<boolean>;
   onUpdateUser: (user: RegisteredUser) => Promise<void> | void;
   onSyncDatabase: () => void;
   isSyncing: boolean;
@@ -201,9 +201,7 @@ useEffect(() => {
   };
 
   // User management hooks
-const handleAddUser = async (newUser: RegisteredUser) => {
-  setUsers((prev) => [newUser, ...prev]);
-
+const handleAddUser = async (newUser: RegisteredUser): Promise<boolean> => {
   const { error } = await supabase
     .from('users')
     .insert([
@@ -220,11 +218,12 @@ const handleAddUser = async (newUser: RegisteredUser) => {
     ]);
 
   if (error) {
-    console.error('Error al guardar en Supabase:', error.message);
+    console.error('Error al guardar en Supabase:', error.message, error.details ?? error);
     alert('Hubo un error al guardar tus datos, intenta de nuevo.');
-    return;
+    return false;
   }
 
+  setUsers((prev) => [newUser, ...prev]);
   console.log('Usuario guardado con éxito en la nube');
   alert('¡Registro exitoso!');
 
@@ -287,6 +286,8 @@ const handleAddUser = async (newUser: RegisteredUser) => {
       }
     })();
   }
+
+  return true;
 };
 
   const resendFailedEmails = async () => {

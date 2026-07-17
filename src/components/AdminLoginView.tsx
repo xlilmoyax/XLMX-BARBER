@@ -17,7 +17,7 @@ interface AdminLoginViewProps {
   onNavigate: (screen: Screen) => void;
   onLoginSuccess: () => void;
   users: RegisteredUser[];
-  onAddUser: (user: RegisteredUser) => void;
+  onAddUser: (user: RegisteredUser) => Promise<boolean>;
   loggedInClient: RegisteredUser | null;
   setLoggedInClient: (user: RegisteredUser | null) => void;
 }
@@ -39,7 +39,6 @@ export default function AdminLoginView({
   const [phone, setPhone] = useState('');
   const [isSocio, setIsSocio] = useState<boolean>(false);
   const [membership, setMembership] = useState<'bronce' | 'plata' | 'gold' | 'ninguno'>('ninguno');
-  const [associateSync, setAssociateSync] = useState<boolean>(true);
 
   // Admin login states
   const [showAdminLogin, setShowAdminLogin] = useState(false);
@@ -162,32 +161,14 @@ export default function AdminLoginView({
         createdAt: new Date().toISOString(),
       };
 
-      // Save to Supabase
-      const { error: insertError } = await supabase
-        .from('users')
-        .insert([
-          {
-            id: newUser.id,
-            fullname: newUser.fullname,
-            email: newUser.email,
-            phone: newUser.phone,
-            age: newUser.age,
-            is_socio: newUser.isSocio,
-            membership: newUser.membership,
-            created_at: newUser.createdAt
-          }
-        ]);
-
-      if (insertError) throw insertError;
-
-      onAddUser(newUser); // updates local state in App.tsx
-      setLoggedInClient(newUser);
-
-      let alertText = `¡Registro Exitoso para ${sanitizedName}!`;
-      if (associateSync) {
-        alertText += ' Sincronizado instantáneamente con la casilla matymoya4@gmail.com.';
+      // Save to Supabase and send notifications
+      const success = await onAddUser(newUser);
+      if (!success) {
+        throw new Error('No se pudo guardar el registro, intenta de nuevo.');
       }
-      setSuccessMsg(alertText);
+
+      setLoggedInClient(newUser);
+      setSuccessMsg(`¡Registro Exitoso para ${sanitizedName}!`);
 
       // Reset registration form inputs
       setFullname('');
@@ -589,28 +570,6 @@ export default function AdminLoginView({
                         className="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2.5 pl-10 text-xs text-white focus:outline-none focus:border-amber-400 transition-colors"
                         disabled={loading}
                       />
-                    </div>
-                  </div>
-
-                  {/* Sync warnings */}
-                  <div className="p-3 rounded bg-zinc-950 border border-zinc-850">
-                    <div className="flex gap-2.5 items-start">
-                      <input
-                        id="reg-sync"
-                        type="checkbox"
-                        checked={associateSync}
-                        onChange={(e) => setAssociateSync(e.target.checked)}
-                        className="mt-0.5 w-4 h-4 text-amber-400 accent-amber-400 border-zinc-850 rounded focus:ring-0 cursor-pointer"
-                        disabled={loading}
-                      />
-                      <div>
-                        <label htmlFor="reg-sync" className="text-zinc-200 text-xs font-semibold cursor-pointer select-none block">
-                          Vincular con matymoya4@gmail.com
-                        </label>
-                        <p className="text-[10px] text-zinc-500 font-light mt-0.5">
-                          Marca para lanzar notificaciones de coordinación en tiempo real.
-                        </p>
-                      </div>
                     </div>
                   </div>
 

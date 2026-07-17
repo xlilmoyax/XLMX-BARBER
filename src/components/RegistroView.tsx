@@ -9,7 +9,7 @@ import { CornerUpLeft, User, Mail, Phone, Calendar, BadgePercent, CheckCircle2, 
 
 interface RegistroViewProps {
   onNavigate: (screen: Screen) => void;
-  onAddUser: (user: RegisteredUser) => void;
+  onAddUser: (user: RegisteredUser) => Promise<boolean>;
   isSection?: boolean;
   // Cambiamos a 'RegisteredUser | null' para que coincida con App.tsx
   setLoggedInClient?: (user: RegisteredUser | null) => void; 
@@ -23,11 +23,13 @@ export default function RegistroView({ onNavigate, onAddUser, isSection = false,
   const [isSocio, setIsSocio] = useState<boolean>(false);
   const [membership, setMembership] = useState<'bronce' | 'plata' | 'gold' | 'ninguno'>('ninguno');
   
-  // Registration success warning state
+  // Registration UI state
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg(null);
     
     if (!fullname.trim() || !email.trim() || !phone.trim()) {
       alert('Por favor complete todos los campos obligatorios del perfil.');
@@ -45,23 +47,25 @@ export default function RegistroView({ onNavigate, onAddUser, isSection = false,
       createdAt: new Date().toISOString(),
     };
 
-    onAddUser(newUser);
+    const success = await onAddUser(newUser);
+    if (!success) {
+      setErrorMsg('No se pudo completar el registro. Intenta de nuevo más tarde.');
+      return;
+    }
+
     if (setLoggedInClient) {
       setLoggedInClient(newUser);
     }
 
-    // Set success notification message
     const alertText = `¡Registro Exitoso para ${fullname}!`;
     setSuccessMsg(alertText);
 
-    // Reset fields
     setFullname('');
     setEmail('');
     setPhone('');
     setIsSocio(false);
     setMembership('ninguno');
 
-    // Auto dismiss after 5 seconds
     setTimeout(() => {
       setSuccessMsg(null);
     }, 5000);
