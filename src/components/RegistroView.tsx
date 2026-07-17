@@ -22,7 +22,6 @@ export default function RegistroView({ onNavigate, onAddUser, isSection = false,
   const [phone, setPhone] = useState('');
   const [isSocio, setIsSocio] = useState<boolean>(false);
   const [membership, setMembership] = useState<'bronce' | 'plata' | 'gold' | 'ninguno'>('ninguno');
-  const [associateSync, setAssociateSync] = useState<boolean>(true);
   
   // Registration success warning state
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -52,10 +51,7 @@ export default function RegistroView({ onNavigate, onAddUser, isSection = false,
     }
 
     // Set success notification message
-    let alertText = `¡Registro Exitoso para ${fullname}!`;
-    if (associateSync) {
-      alertText += ' Vinculado con éxito para alertas sincronizadas con matymoya4@gmail.com.';
-    }
+    const alertText = `¡Registro Exitoso para ${fullname}!`;
     setSuccessMsg(alertText);
 
     // Reset fields
@@ -203,26 +199,7 @@ export default function RegistroView({ onNavigate, onAddUser, isSection = false,
             </div>
           </div>
 
-          {/* Exclusive Sync warning alignment */}
-          <div className="p-4 rounded bg-zinc-950 border border-zinc-850 space-y-3">
-            <div className="flex items-start gap-2.5">
-              <input
-                id="reg-checkbox-sync"
-                type="checkbox"
-                checked={associateSync}
-                onChange={(e) => setAssociateSync(e.target.checked)}
-                className="mt-1 w-4 h-4 text-amber-400 accent-amber-400 border-zinc-850 rounded focus:ring-0 cursor-pointer"
-              />
-              <div>
-                <label htmlFor="reg-checkbox-sync" className="text-zinc-200 text-xs font-semibold cursor-pointer select-none block">
-                  Asociar a matymoya4@gmail.com
-                </label>
-                <p className="text-[11px] text-zinc-500 font-light mt-0.5">
-                  Marca esta opción para que tu registro lance alertas de auditoría automáticas instantáneas y sincronización inmediata con las casillas de coordinación administrativa de Barbería XLMX.
-                </p>
-              </div>
-            </div>
-          </div>
+          {/* Exclusive sync UI removed: registration always creates alerts via backend admin workflow. */}
 
           {/* Socio Level Option fields */}
           <div className="p-4 rounded bg-zinc-950 border border-zinc-850 space-y-3.5">
