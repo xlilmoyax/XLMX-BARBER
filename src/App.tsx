@@ -57,14 +57,24 @@ export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>(() => getScreenFromHash(window.location.hash));
 const [users, setUsers] = useState<RegisteredUser[]>(() => {
     const savedUsers = localStorage.getItem('xlmx_users');
-    return savedUsers ? JSON.parse(savedUsers) : INITIAL_USERS;
+    try {
+      return savedUsers ? JSON.parse(savedUsers) : INITIAL_USERS;
+    } catch {
+      localStorage.removeItem('xlmx_users');
+      return INITIAL_USERS;
+    }
   });
 const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(() => {
   return localStorage.getItem('xlmx_admin_logged') === 'true';
 });
 const [loggedInClient, setLoggedInClient] = useState<RegisteredUser | null>(() => {
     const savedClient = localStorage.getItem('xlmx_logged_client');
-    return savedClient ? JSON.parse(savedClient) : null;
+    try {
+      return savedClient ? JSON.parse(savedClient) : null;
+    } catch {
+      localStorage.removeItem('xlmx_logged_client');
+      return null;
+    }
   });
   const [emailStatus, setEmailStatus] = useState<string | null>(null);
   const [failedEmailJobs, setFailedEmailJobs] = useState<Array<{id:string; template:string; params:any; error?: any; ts?: string; attempts?: number; dbId?: any;}>>([]);
