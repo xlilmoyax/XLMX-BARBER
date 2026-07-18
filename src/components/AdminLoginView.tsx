@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { Screen, RegisteredUser } from '../types';
-import { supabase, mapRowToUser } from '../lib/supabaseClient';
+import { isSupabaseConfigured, supabase, mapRowToUser } from '../lib/supabaseClient';
 import { sanitizeInput, validateEmail, validatePhone } from '../lib/security';
 import { 
   CornerUpLeft, Lock, User, AlertTriangle, KeyRound, 
@@ -25,6 +25,7 @@ interface AdminLoginViewProps {
 export default function AdminLoginView({ 
   onNavigate, 
   onLoginSuccess,
+  users,
   onAddUser,
   loggedInClient,
   setLoggedInClient
@@ -34,7 +35,7 @@ export default function AdminLoginView({
   
   // Registration Form States
   const [fullname, setFullname] = useState('');
-  const [age, setAge] = useState<number>(25);
+  const [age, setAge] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [isSocio, setIsSocio] = useState<boolean>(false);
@@ -73,14 +74,41 @@ export default function AdminLoginView({
     setLoading(true);
     setClientErrorMsg(null);
 
+    if (!isSupabaseConfigured) {
+      const localUser = users.find((user) => user.email.trim().toLowerCase() === sanitizedEmail);
+      if (localUser) {
+        setLoggedInClient(localUser);
+        setSuccessMsg(`¡Bienvenido de vuelta, ${localUser.fullname}! Tu pasaporte digital está listo.`);
+        setClientEmail('');
+        setTimeout(() => setSuccessMsg(null), 5000);
+      } else {
+        setClientErrorMsg('El correo ingresado no coincide con ningún cliente registrado en este dispositivo.');
+      }
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data, error } = await supabase
         .from('users')
         .select('*')
         .eq('email', sanitizedEmail)
+        .limit(1)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        // Permite entrar con un perfil que ya quedó guardado en este navegador
+        // si la consulta remota no está disponible temporalmente.
+        const localUser = users.find((user) => user.email.trim().toLowerCase() === sanitizedEmail);
+        if (localUser) {
+          setLoggedInClient(localUser);
+          setSuccessMsg(`¡Bienvenido de vuelta, ${localUser.fullname}! Tu pasaporte digital está listo.`);
+          setClientEmail('');
+          setTimeout(() => setSuccessMsg(null), 5000);
+          return;
+        }
+        throw error;
+      }
 
       if (data) {
         const mappedUser = mapRowToUser(data);
@@ -89,6 +117,14 @@ export default function AdminLoginView({
         setClientEmail('');
         setTimeout(() => setSuccessMsg(null), 5000);
       } else {
+        const localUser = users.find((user) => user.email.trim().toLowerCase() === sanitizedEmail);
+        if (localUser) {
+          setLoggedInClient(localUser);
+          setSuccessMsg(`¡Bienvenido de vuelta, ${localUser.fullname}! Tu pasaporte digital está listo.`);
+          setClientEmail('');
+          setTimeout(() => setSuccessMsg(null), 5000);
+          return;
+        }
         setClientErrorMsg('El correo ingresado no coincide con ningún cliente registrado. Por favor, crea un perfil en la pestaña "Registrarse".');
         setIsShaking(true);
         setTimeout(() => setIsShaking(false), 500);
@@ -129,18 +165,36 @@ export default function AdminLoginView({
       return;
     }
 
+    const parsedAge = Number(age);
+    if (!Number.isInteger(parsedAge) || parsedAge < 8 || parsedAge > 120) {
+      setClientErrorMsg('Ingresa una edad válida entre 8 y 120 años.');
+      return;
+    }
+
     setLoading(true);
     setClientErrorMsg(null);
 
     try {
-      // Check duplicate email in Supabase
-      const { data: existingUser, error: checkError } = await supabase
-        .from('users')
-        .select('id')
-        .eq('email', sanitizedEmail)
-        .maybeSingle();
+      const localUser = users.find((user) => user.email.trim().toLowerCase() === sanitizedEmail);
+      if (localUser) {
+        setClientErrorMsg('Este correo electrónico ya tiene un perfil activo. Intenta iniciar sesión en la pestaña contigua.');
+        setIsShaking(true);
+        setTimeout(() => setIsShaking(false), 500);
+        return;
+      }
 
-      if (checkError) throw checkError;
+      let existingUser: { id: string } | null = null;
+      if (isSupabaseConfigured) {
+        const { data, error: checkError } = await supabase
+          .from('users')
+          .select('id')
+          .eq('email', sanitizedEmail)
+          .limit(1)
+          .maybeSingle();
+
+        if (checkError) throw checkError;
+        existingUser = data;
+      }
 
       if (existingUser) {
         setClientErrorMsg('Este correo electrónico ya tiene un perfil activo. Intenta iniciar sesión en la pestaña contigua.');
@@ -153,7 +207,7 @@ export default function AdminLoginView({
       const newUser: RegisteredUser = {
         id: 'usr_' + Date.now().toString(36),
         fullname: sanitizedName,
-        age,
+        age: parsedAge,
         email: sanitizedEmail,
         phone: sanitizedPhone,
         isSocio,
@@ -174,7 +228,7 @@ export default function AdminLoginView({
       setFullname('');
       setEmail('');
       setPhone('');
-      setAge(25);
+      setAge('');
       setIsSocio(false);
       setMembership('ninguno');
 
@@ -524,11 +578,11 @@ export default function AdminLoginView({
                       <div className="relative">
                         <Calendar className="absolute left-3 top-3 w-4 h-4 text-zinc-500" />
                         <input
-                          type="number"
-                          min={9}
-                          max={120}
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
                           value={age}
-                          onChange={(e) => setAge(parseInt(e.target.value) || 25)}
+                          onChange={(e) => setAge(e.target.value.replace(/\D/g, ''))}
                           className="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2.5 pl-10 text-xs text-white focus:outline-none focus:border-amber-400 transition-colors"
                           disabled={loading}
                         />

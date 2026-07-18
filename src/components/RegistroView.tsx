@@ -17,7 +17,7 @@ interface RegistroViewProps {
 
 export default function RegistroView({ onNavigate, onAddUser, isSection = false, setLoggedInClient }: RegistroViewProps) {
   const [fullname, setFullname] = useState('');
-  const [age, setAge] = useState<number>(25);
+  const [age, setAge] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [isSocio, setIsSocio] = useState<boolean>(false);
@@ -36,10 +36,16 @@ export default function RegistroView({ onNavigate, onAddUser, isSection = false,
       return;
     }
 
+    const parsedAge = Number(age);
+    if (!Number.isInteger(parsedAge) || parsedAge < 8 || parsedAge > 120) {
+      setErrorMsg('Ingresa una edad válida entre 8 y 120 años.');
+      return;
+    }
+
     const newUser: RegisteredUser = {
       id: 'usr_' + Date.now().toString(36),
       fullname,
-      age,
+      age: parsedAge,
       email,
       phone,
       isSocio,
@@ -61,6 +67,7 @@ export default function RegistroView({ onNavigate, onAddUser, isSection = false,
     setSuccessMsg(alertText);
 
     setFullname('');
+    setAge('');
     setEmail('');
     setPhone('');
     setIsSocio(false);
@@ -152,13 +159,12 @@ export default function RegistroView({ onNavigate, onAddUser, isSection = false,
                 <Calendar className="absolute left-3 top-3.5 w-4 h-4 text-zinc-500" />
                 <input
                   id="reg-input-age"
-                  type="number"
-                  min={8}
-                  max={120}
-                  step={1}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   required
                   value={age}
-                  onChange={(e) => setAge(parseInt(e.target.value) || 25)}
+                  onChange={(e) => setAge(e.target.value.replace(/\D/g, ''))}
                   className="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-3 pl-10 text-xs text-white focus:outline-none focus:border-amber-400/80 transition-colors"
                 />
               </div>

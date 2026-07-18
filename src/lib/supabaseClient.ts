@@ -4,7 +4,21 @@ import { RegisteredUser } from '../types';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+/**
+ * La interfaz puede funcionar con datos locales mientras se configura Supabase.
+ * Evitamos que una variable de entorno ausente rompa toda la aplicación antes
+ * de que React pueda mostrar la página.
+ */
+export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseKey);
+
+if (!isSupabaseConfigured) {
+  console.warn('Supabase no está configurado: se usarán los datos locales disponibles.');
+}
+
+export const supabase = createClient(
+  supabaseUrl || 'https://local-placeholder.supabase.co',
+  supabaseKey || 'local-placeholder-anon-key',
+);
 
 /**
  * Maps a Supabase row (snake_case) to a RegisteredUser (camelCase).

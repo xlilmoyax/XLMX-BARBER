@@ -30,7 +30,7 @@ type AdminDashboardTypedProps = {
 const AdminDashboardTyped = AdminDashboardView as unknown as React.ComponentType<AdminDashboardTypedProps>;
 import LegalView from './components/LegalView';
 import emailjs from '@emailjs/browser';
-import { supabase, mapRowToUser } from './lib/supabaseClient';
+import { isSupabaseConfigured, supabase, mapRowToUser, mapUserToRow } from './lib/supabaseClient';
 
 emailjs.init('Oql46z_LFLkAI8_DE');
 
@@ -73,6 +73,8 @@ useEffect(() => {
     localStorage.setItem('xlmx_users', JSON.stringify(users));
   }, [users]);
 useEffect(() => {
+  if (!isSupabaseConfigured) return;
+
   const loadUsers = async () => {
     console.log("Cargando usuarios desde Supabase...");
     const { data, error } = await supabase.from('users').select('*');
@@ -81,7 +83,20 @@ useEffect(() => {
       return;
     }
     if (data) {
-      setUsers(data.map(mapRowToUser));
+      const remoteUsers = data.map(mapRowToUser);
+      const remoteIds = new Set(remoteUsers.map((user) => user.id));
+      const localOnlyUsers = users.filter((user) => !remoteIds.has(user.id));
+
+      // Al volver a tener conexión, sube los registros locales que aún no
+      // existen en Supabase para que ambas fuentes tengan la misma información.
+      if (localOnlyUsers.length > 0) {
+        const { error: syncError } = await supabase
+          .from('users')
+          .upsert(localOnlyUsers.map(mapUserToRow), { onConflict: 'id' });
+        if (syncError) console.error('No se pudieron sincronizar los usuarios locales:', syncError.message);
+      }
+
+      setUsers([...localOnlyUsers, ...remoteUsers]);
       console.log("Usuarios cargados desde Supabase:", data.length);
     }
   };
@@ -97,7 +112,7 @@ useEffect(() => {
   }, [loggedInClient]);
 
   useEffect(() => {
-    if (!loggedInClient) return;
+    if (!isSupabaseConfigured || !loggedInClient) return;
 
     const verifyCurrentUser = async () => {
       const { data, error } = await supabase
@@ -124,6 +139,8 @@ useEffect(() => {
 
   // Realtime sync with Supabase users table.
   useEffect(() => {
+    if (!isSupabaseConfigured) return;
+
     const channel = supabase
       .channel('users-changes')
       .on(
@@ -202,29 +219,33 @@ useEffect(() => {
 
   // User management hooks
 const handleAddUser = async (newUser: RegisteredUser): Promise<boolean> => {
-  const { error } = await supabase
-    .from('users')
-    .insert([
-      {
-        id: newUser.id, // <--- ¡Asegúrate de incluir esto!
-        fullname: newUser.fullname,
-        email: newUser.email,
-        phone: newUser.phone,
-        age: newUser.age,
-        is_socio: newUser.isSocio,
-        membership: newUser.membership,
-        created_at: newUser.createdAt,
-      },
-    ]);
+  if (isSupabaseConfigured) {
+    const { error } = await supabase
+      .from('users')
+      .insert([
+        {
+          id: newUser.id,
+          fullname: newUser.fullname,
+          email: newUser.email,
+          phone: newUser.phone,
+          age: newUser.age,
+          is_socio: newUser.isSocio,
+          membership: newUser.membership,
+          created_at: newUser.createdAt,
+        },
+      ]);
 
-  if (error) {
-    console.error('Error al guardar en Supabase:', error.message, error.details ?? error);
-    alert('Hubo un error al guardar tus datos, intenta de nuevo.');
-    return false;
+    if (error) {
+      console.error('Error al guardar en Supabase:', error.message, error.details ?? error);
+      alert('Hubo un error al guardar tus datos, intenta de nuevo.');
+      return false;
+    }
+  } else {
+    console.warn('Registro guardado localmente: Supabase no está configurado.');
   }
 
   setUsers((prev) => [newUser, ...prev]);
-  console.log('Usuario guardado con éxito en la nube');
+  console.log(isSupabaseConfigured ? 'Usuario guardado con éxito en la nube' : 'Usuario guardado localmente');
   alert('¡Registro exitoso!');
 
   const emailTemplateParams = {
@@ -246,7 +267,7 @@ const handleAddUser = async (newUser: RegisteredUser): Promise<boolean> => {
   } catch (emailError: any) {
     console.error('Error al enviar notificación por email (welcome):', emailError);
     const errInfo = { message: emailError?.message ?? String(emailError), stack: emailError?.stack ?? null };
-    setEmailStatus('No se pudo enviar la notificación de bienvenida. Puedes reintentarlo desde el panel.');
+    setEmailStatus('No se pudo enviar la notificación de bienvenida. El sistema la reintentará automáticamente.');
     const jobEntry = { id: newUser.id, template: 'template_16q07to', params: emailTemplateParams, error: errInfo, ts: new Date().toISOString(), attempts: 1 };
     setFailedEmailJobs((prev) => [...prev, jobEntry]);
     // try to persist for automatic retries
@@ -387,13 +408,13 @@ const handleAddUser = async (newUser: RegisteredUser): Promise<boolean> => {
   }, []);
 
   const handleDeleteUser = async (userId: string) => {
-  // Borrar en Supabase
-  const { error } = await supabase.from('users').delete().eq('id', userId);
-  
-  if (error) {
-    console.error('Error al borrar en Supabase:', error);
-    alert('No se pudo eliminar el usuario de la base de datos.');
-    return;
+  if (isSupabaseConfigured) {
+    const { error } = await supabase.from('users').delete().eq('id', userId);
+    if (error) {
+      console.error('Error al borrar en Supabase:', error);
+      alert('No se pudo eliminar el usuario de la base de datos.');
+      return;
+    }
   }
 
   setUsers((prev) => prev.filter((u) => u.id !== userId));
@@ -408,27 +429,31 @@ const handleAddUser = async (newUser: RegisteredUser): Promise<boolean> => {
 
   const handleUpdateUser = async (updatedUser: RegisteredUser) => {
   try {
-    const { data, error } = await supabase
-      .from('users')
-      .update({
-        fullname: updatedUser.fullname,
-        email: updatedUser.email,
-        phone: updatedUser.phone,
-        age: updatedUser.age,
-        is_socio: updatedUser.isSocio,
-        membership: updatedUser.membership,
-      })
-      .eq('id', updatedUser.id)
-      .select()
-      .maybeSingle();
+    let updated = updatedUser;
+    if (isSupabaseConfigured) {
+      const { data, error } = await supabase
+        .from('users')
+        .update({
+          fullname: updatedUser.fullname,
+          email: updatedUser.email,
+          phone: updatedUser.phone,
+          age: updatedUser.age,
+          is_socio: updatedUser.isSocio,
+          membership: updatedUser.membership,
+        })
+        .eq('id', updatedUser.id)
+        .select()
+        .maybeSingle();
 
-    if (error) {
-      console.error('Error al actualizar en Supabase:', error);
-      alert('No se pudo actualizar el usuario en la base de datos.');
-      return;
+      if (error) {
+        console.error('Error al actualizar en Supabase:', error);
+        alert('No se pudo actualizar el usuario en la base de datos.');
+        return;
+      }
+
+      updated = data ? mapRowToUser(data) : updatedUser;
     }
 
-    const updated = data ? mapRowToUser(data) : updatedUser;
     setUsers((prev) => prev.map(u => u.id === updated.id ? updated : u));
 
     if (loggedInClient?.id === updated.id) {
@@ -463,6 +488,11 @@ const handleLogoutClient = () => {
     currentMembership === 'bronce' ? 'theme-bronce' : '';
 
   const handleSyncDatabase = async () => {
+  if (!isSupabaseConfigured) {
+    alert('Supabase no está configurado. Agrega VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en .env.local.');
+    return;
+  }
+
   setIsSyncing(true);
   try {
     const { data, error } = await supabase.from('users').select('*');
@@ -497,7 +527,8 @@ const handleLogoutClient = () => {
           {emailStatus}
         </div>
       )}
-      {failedEmailJobs.length > 0 && (
+      {/* Los reintentos de correo son automáticos y no se exponen al cliente. */}
+      {false && failedEmailJobs.length > 0 && (
         <div className="max-w-4xl mx-auto mt-2 px-4 py-2 rounded border border-rose-200/20 bg-rose-400/5 text-rose-100 text-sm text-center">
           <div className="flex items-center justify-between gap-3">
             <span>{failedEmailJobs.length} notificación(es) pendientes de envío.</span>
@@ -509,7 +540,7 @@ const handleLogoutClient = () => {
         </div>
       )}
 
-      {showFailedDetails && (
+      {false && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-zinc-900 p-4 rounded w-full max-w-2xl overflow-auto max-h-[80vh]">
             <div className="flex justify-between items-center mb-3">
@@ -596,6 +627,10 @@ const handleLogoutClient = () => {
     isSyncing={isSyncing}
   />
 )}
+
+        {currentScreen === 'legal' && (
+          <LegalView onNavigate={handleNavigate} />
+        )}
 
       </main>
 
